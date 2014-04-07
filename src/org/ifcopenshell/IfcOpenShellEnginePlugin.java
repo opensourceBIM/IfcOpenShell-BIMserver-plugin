@@ -77,23 +77,24 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	public void init(PluginManager pluginManager) throws PluginException {
 		PluginContext pluginContext = pluginManager.getPluginContext(this);
 		final String os = System.getProperty("os.name").toLowerCase();
-		final String exeName;
-		final String exeDir;
+		final String executableName;
+		final String operatingSystem;
 		if (os.contains("windows")) {
-			exeDir = "win";
-			exeName = "IfcGeomServer.exe";
+			operatingSystem = "win";
+			executableName = "IfcGeomServer.exe";
 		} else if (os.contains("osx") || os.contains("os x") || os.contains("darwin")) {
-			exeDir = "osx";
-			exeName = "IfcGeomServer";
+			operatingSystem = "osx";
+			executableName = "IfcGeomServer";
 		} else if (os.contains("linux")) {
-			exeDir = "linux";
-			exeName = "IfcGeomServer";
+			operatingSystem = "linux";
+			executableName = "IfcGeomServer";
 		} else {
 			throw new PluginException(String.format("IfcOpenShell is not available on the %s platorm", os));
 		}
 		try {
-			final String exePath = "exe/" + System.getProperty("sun.arch.data.model") + "/" + exeName;
-			pluginContext.getResourceAsInputStream(exePath);
+			final String bitness = operatingSystem == "osx" ? "64" : System.getProperty("sun.arch.data.model");
+			final String exePath = String.format("exe/%s/%s/%s", bitness, operatingSystem, executableName);
+			final InputStream inputStream = pluginContext.getResourceAsInputStream(exePath);
 			if (inputStream != null) {
 				File nativeFolder = new File(pluginManager.getTempDir(), "IfcOpenShellEngine");
 				if (nativeFolder.exists()) {
@@ -104,7 +105,7 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 					}
 				}
 				FileUtils.forceMkdir(nativeFolder);
-				File file = new File(nativeFolder, exeName);
+				File file = new File(nativeFolder, executableName);
 				IOUtils.copy(inputStream, new FileOutputStream(file));
 				try {
 					file.setExecutable(true, false);
@@ -119,6 +120,9 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 			}
 		} catch (Exception e) {
 			throw new PluginException(e);
+		}
+		if (!initialized) {
+			throw new PluginException(String.format("No executable found for the %s platorm", os));
 		}
 	}
 
