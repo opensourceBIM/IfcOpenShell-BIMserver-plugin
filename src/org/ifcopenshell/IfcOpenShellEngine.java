@@ -26,11 +26,13 @@
 
 package org.ifcopenshell;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.bimserver.plugins.renderengine.RenderEngine;
 import org.bimserver.plugins.renderengine.RenderEngineException;
 import org.bimserver.plugins.renderengine.RenderEngineModel;
@@ -68,9 +70,9 @@ public class IfcOpenShellEngine implements RenderEngine {
 	@Override
 	public RenderEngineModel openModel(InputStream inputStream, int size) throws RenderEngineException {
 		try {
-			byte[] bytes = new byte[size];
-			inputStream.read(bytes);
-			return openModel(bytes);
+			ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+			IOUtils.copy(inputStream, bytes);
+			return openModel(bytes.toByteArray());
 		} catch (IOException e) {
 			throw new RenderEngineException("Failed to open model");
 		}
