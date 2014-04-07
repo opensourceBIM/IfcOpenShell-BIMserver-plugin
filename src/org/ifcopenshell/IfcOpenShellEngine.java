@@ -70,7 +70,7 @@ public class IfcOpenShellEngine implements RenderEngine {
 	@Override
 	public RenderEngineModel openModel(InputStream inputStream, int size) throws RenderEngineException {
 		try {
-			ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+			ByteArrayOutputStream bytes = new ByteArrayOutputStream(size);
 			IOUtils.copy(inputStream, bytes);
 			return openModel(bytes.toByteArray());
 		} catch (IOException e) {
