@@ -92,7 +92,7 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 			throw new PluginException(String.format("IfcOpenShell is not available on the %s platorm", os));
 		}
 		try {
-			final String bitness = operatingSystem == "osx" ? "64" : System.getProperty("sun.arch.data.model");
+			final String bitness = operatingSystem.equals("osx") ? "64" : System.getProperty("sun.arch.data.model");
 			final String exePath = String.format("exe/%s/%s/%s", bitness, operatingSystem, executableName);
 			final InputStream inputStream = pluginContext.getResourceAsInputStream(exePath);
 			if (inputStream != null) {
