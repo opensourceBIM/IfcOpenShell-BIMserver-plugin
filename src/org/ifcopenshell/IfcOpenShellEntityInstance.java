@@ -19,9 +19,8 @@
 
 package org.ifcopenshell;
 
-import org.bimserver.plugins.renderengine.RenderEngineException;
+import org.bimserver.plugins.renderengine.RenderEngineGeometry;
 import org.bimserver.plugins.renderengine.RenderEngineInstance;
-import org.bimserver.plugins.renderengine.RenderEngineInstanceVisualisationProperties;
 
 public class IfcOpenShellEntityInstance implements RenderEngineInstance {
 	private IfcGeomServerClientEntity entity;
@@ -31,13 +30,15 @@ public class IfcOpenShellEntityInstance implements RenderEngineInstance {
 	}
 
 	@Override
-	public RenderEngineInstanceVisualisationProperties getVisualisationProperties()
-			throws RenderEngineException {
-		return new RenderEngineInstanceVisualisationPropertiesImpl(entity);
-	}
-	
-	@Override
 	public float[] getTransformationMatrix() {
 		return entity.getMatrix();
+	}
+
+	@Override
+	public RenderEngineGeometry generateGeometry() {
+		if (entity == null) {
+			return null;
+		}
+		return new RenderEngineGeometry(entity.getIndices(), entity.getPositions(), entity.getNormals(), entity.getColors(), entity.getMaterialIndices());
 	}
 }

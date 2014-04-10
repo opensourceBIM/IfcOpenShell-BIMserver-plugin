@@ -3,7 +3,6 @@ package org.ifcopenshell.test;
 import java.io.File;
 import java.io.IOException;
 
-import org.bimserver.geometry.Matrix;
 import org.bimserver.plugins.renderengine.RenderEngineException;
 import org.bimserver.plugins.renderengine.RenderEngineInstance;
 import org.bimserver.plugins.renderengine.RenderEngineModel;
@@ -18,10 +17,9 @@ public class Test {
 		try {
 			IfcOpenShellEngine ifcOpenShellEngine = new IfcOpenShellEngine("exe/64/win/IfcGeomServer.exe");
 			RenderEngineModel model = ifcOpenShellEngine.openModel(new File("E:\\Git\\BIMserver\\TestData\\data\\AC11-FZK-Haus-IFC.ifc"));
-			model.finalizeModelling(model.initializeModelling());
-			for (RenderEngineInstance instance : model.getInstances("IFCWALL")) {
-				Matrix.dump(instance.getTransformationMatrix());
-			}
+			model.generateGeneralGeometry();
+			RenderEngineInstance instance = model.getInstanceFromExpressId(12345);
+			System.out.println(instance.getTransformationMatrix());
 			model.close();
 			ifcOpenShellEngine.close();
 		} catch (IOException e) {

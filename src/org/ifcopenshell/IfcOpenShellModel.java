@@ -29,18 +29,12 @@
 
 package org.ifcopenshell;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
 
-import org.bimserver.plugins.renderengine.RenderEngineClash;
 import org.bimserver.plugins.renderengine.RenderEngineException;
-import org.bimserver.plugins.renderengine.RenderEngineGeometry;
 import org.bimserver.plugins.renderengine.RenderEngineInstance;
 import org.bimserver.plugins.renderengine.RenderEngineModel;
 import org.bimserver.plugins.renderengine.RenderEngineSettings;
-import org.bimserver.plugins.renderengine.RenderEngineSurfaceProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +44,6 @@ public class IfcOpenShellModel implements RenderEngineModel {
 	private String filename;
 	private byte[] ifcSpfData;
 
-	private HashMap<String,List<IfcOpenShellEntityInstance>> instances;
 	private HashMap<Integer,IfcOpenShellEntityInstance> instancesById;
 	
 	public IfcOpenShellModel(String filename, byte[] ifcSpfData) throws RenderEngineException {
@@ -60,25 +53,14 @@ public class IfcOpenShellModel implements RenderEngineModel {
 
 	@Override
 	public void close() throws RenderEngineException {
-		if (instances != null) {
-			instances.clear();
+		if (instancesById != null) {
 			instancesById.clear();
 		}
 	}
 
 	@Override
-	public RenderEngineGeometry finalizeModelling(
-			RenderEngineSurfaceProperties surfaceProperties)
-			throws RenderEngineException {
-		
-		int[] indices = null;
-		int[] materialIndices = null;
-		float[] normals = null;
-		float[] vertices = null;
-		float[] materials = null;
-		
+	public void generateGeneralGeometry() throws RenderEngineException {
 		// We keep track of instances ourselves
-		instances = new HashMap<String,List<IfcOpenShellEntityInstance>>();
 		instancesById = new HashMap<Integer,IfcOpenShellEntityInstance>();
 		
 		final double t0 = (double) System.nanoTime();
@@ -88,17 +70,7 @@ public class IfcOpenShellModel implements RenderEngineModel {
 				if (e == null) break;
 				
 				// Store the instance in our dictionary
-				List<IfcOpenShellEntityInstance> entity_list;
-				String type = e.getType().toUpperCase();
-				if ( ! instances.containsKey(type) ) {
-					entity_list = new ArrayList<IfcOpenShellEntityInstance>();
-					instances.put(type, entity_list);
-				} else {
-					entity_list = instances.get(type);
-				}
-				
 				IfcOpenShellEntityInstance instance = new IfcOpenShellEntityInstance(e);
-				entity_list.add(instance);			
 				instancesById.put(e.getId(), instance);
 			}
 		} catch (Exception e) {
@@ -108,45 +80,10 @@ public class IfcOpenShellModel implements RenderEngineModel {
 		final double t1 = (double) System.nanoTime();
 		
 		LOGGER.info(String.format("Took %.2f seconds to obtain representations for %d entities", (t1-t0) / 1.E9, instancesById.size()));
-		
-		return new RenderEngineGeometry(indices, vertices, normals, materials, materialIndices);
 	}
 
 	@Override
-	public Set<RenderEngineClash> findClashesWithEids(double d)
-			throws RenderEngineException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Set<RenderEngineClash> findClashesWithGuids(double d)
-			throws RenderEngineException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<? extends RenderEngineInstance> getInstances(String name)
-			throws RenderEngineException {
-		if (instances.containsKey(name)) return instances.get(name);
-		else return new ArrayList<IfcOpenShellEntityInstance>();
-	}
-
-	@Override
-	public RenderEngineSurfaceProperties initializeModelling()
-			throws RenderEngineException {
-		return null;
-	}
-
-	@Override
-	public void setPostProcessing(boolean postProcessing)
-			throws RenderEngineException {
-	}
-	
-	@Override
-	public RenderEngineInstance getInstanceFromExpressId(int oid)
-			throws RenderEngineException {
+	public RenderEngineInstance getInstanceFromExpressId(int oid) throws RenderEngineException {
 		if ( instancesById.containsKey(oid) ) {
 			return instancesById.get(oid);
 		} else {
