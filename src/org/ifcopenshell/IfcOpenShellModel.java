@@ -60,8 +60,10 @@ public class IfcOpenShellModel implements RenderEngineModel {
 
 	@Override
 	public void close() throws RenderEngineException {
-		instances.clear();
-		instancesById.clear();
+		if (instances != null) {
+			instances.clear();
+			instancesById.clear();
+		}
 	}
 
 	@Override
