@@ -7,6 +7,7 @@ import java.util.Iterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Charsets;
 import com.google.common.io.LittleEndianDataInputStream;
 import com.google.common.io.LittleEndianDataOutputStream;
 
@@ -135,7 +136,7 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 		}
 		
 		protected void writeString(LittleEndianDataOutputStream s, String str) throws IOException {
-			byte[] b = str.getBytes();
+			byte[] b = str.getBytes(Charsets.UTF_8);
 			int len = b.length;
 			s.writeInt(len);
 			s.write(b);
