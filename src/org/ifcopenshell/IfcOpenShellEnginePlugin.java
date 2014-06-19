@@ -51,7 +51,7 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	private String filename;
 
 	@Override
-	public RenderEngine createRenderEngine(PluginConfiguration pluginConfiguration) throws RenderEngineException {
+	public RenderEngine createRenderEngine(PluginConfiguration pluginConfiguration, String schema) throws RenderEngineException {
 		try {
 			return new IfcOpenShellEngine(filename);
 		} catch (IOException e) {
