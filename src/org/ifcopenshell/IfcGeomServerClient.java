@@ -2,8 +2,10 @@ package org.ifcopenshell;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Iterator;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +46,7 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 		return this;
 	}
 	
-	public IfcGeomServerClient(String executableFilename, byte[] ifcSpfData) {
+	public IfcGeomServerClient(String executableFilename, InputStream ifcInputStream) {
 		try {
 			process = Runtime.getRuntime().exec(executableFilename);
 			dos = new LittleEndianDataOutputStream(process.getOutputStream());
@@ -64,7 +66,7 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 				return;
 			}
 			
-			IfcModel m = new IfcModel(ifcSpfData);
+			IfcModel m = new IfcModel(ifcInputStream);
 			m.write(dos);
 			
 			askForMore();
@@ -99,6 +101,9 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 			s.writeInt(iden);
 			ByteArrayOutputStream oss = new ByteArrayOutputStream();
 			write_contents(new LittleEndianDataOutputStream(oss));
+			
+			// Comment Ruben: It seems redundant to send the size twice (when sending a String, LittleEndianness should not change the size I think)
+			// Also storing the intermediate results in another buffer can be avoided I think, why not send the original s variable to write_contents?
 			s.writeInt(oss.size());
 			s.write(oss.toByteArray());
 			s.flush();
@@ -189,11 +194,11 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 	}
 	
 	static class IfcModel extends Command {
-		private String string;
+		private InputStream ifcInputStream;
 		
-		IfcModel(byte[] data) {
+		IfcModel(InputStream ifcInputStream) {
 			super(IFC_MODEL);
-			this.string = new String(data);
+			this.ifcInputStream = ifcInputStream;
 		}
 
 		@Override
@@ -203,7 +208,10 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 
 		@Override
 		void write_contents(LittleEndianDataOutputStream s) throws IOException {
-			writeString(s, string);
+			// This is now the point where memory problems will arise for large models
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			IOUtils.copy(ifcInputStream, baos);
+			writeString(s, new String(baos.toByteArray(), Charsets.UTF_8));
 		}
 	}
 	

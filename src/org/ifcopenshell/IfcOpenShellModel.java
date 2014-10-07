@@ -29,6 +29,7 @@
 
 package org.ifcopenshell;
 
+import java.io.InputStream;
 import java.util.HashMap;
 
 import org.bimserver.plugins.renderengine.RenderEngineException;
@@ -42,13 +43,13 @@ public class IfcOpenShellModel implements RenderEngineModel {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IfcOpenShellModel.class);
 	
 	private String filename;
-	private byte[] ifcSpfData;
+	private InputStream ifcInputStream;
 
 	private HashMap<Integer,IfcOpenShellEntityInstance> instancesById;
 	
-	public IfcOpenShellModel(String filename, byte[] ifcSpfData) throws RenderEngineException {
+	public IfcOpenShellModel(String filename, InputStream ifcInputStream) throws RenderEngineException {
 		this.filename = filename;
-		this.ifcSpfData = ifcSpfData;
+		this.ifcInputStream = ifcInputStream;
 	}
 
 	@Override
@@ -65,7 +66,7 @@ public class IfcOpenShellModel implements RenderEngineModel {
 		
 		final double t0 = (double) System.nanoTime();
 
-		try (IfcGeomServerClient client = new IfcGeomServerClient(filename, ifcSpfData)) {
+		try (IfcGeomServerClient client = new IfcGeomServerClient(filename, ifcInputStream)) {
 			for (IfcGeomServerClientEntity e : client) {
 				if (e == null) break;
 				
