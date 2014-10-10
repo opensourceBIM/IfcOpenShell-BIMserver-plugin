@@ -72,6 +72,11 @@ public class IfcOpenShellEngine implements RenderEngine {
 	}
 
 	@Override
+	public RenderEngineModel openModel(InputStream inputStream) throws RenderEngineException {
+		return new IfcOpenShellModel(filename, inputStream);
+	}
+
+	@Override
 	public RenderEngineModel openModel(byte[] bytes) throws RenderEngineException {
 		return new IfcOpenShellModel(filename, new ByteArrayInputStream(bytes));
 	}
