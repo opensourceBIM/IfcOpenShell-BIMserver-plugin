@@ -147,6 +147,13 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 			s.write(b);
 			while (len++ % 4 != 0) s.write(0);
 		}
+
+		protected void writeStringBinary(LittleEndianDataOutputStream s, byte[] data) throws IOException {
+			int len = data.length;
+			s.writeInt(len);
+			s.write(data);
+			while (len++ % 4 != 0) s.write(0);
+		}
 	}
 	
 	static class Hello extends Command {
@@ -211,7 +218,7 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 			// This is now the point where memory problems will arise for large models
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			IOUtils.copy(ifcInputStream, baos);
-			writeString(s, new String(baos.toByteArray(), Charsets.UTF_8));
+			writeStringBinary(s, baos.toByteArray());
 		}
 	}
 	
