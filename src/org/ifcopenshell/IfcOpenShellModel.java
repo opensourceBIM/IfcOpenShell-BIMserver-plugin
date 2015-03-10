@@ -32,6 +32,7 @@ package org.ifcopenshell;
 import java.io.InputStream;
 import java.util.HashMap;
 
+import org.bimserver.plugins.renderengine.EntityNotFoundException;
 import org.bimserver.plugins.renderengine.RenderEngineException;
 import org.bimserver.plugins.renderengine.RenderEngineInstance;
 import org.bimserver.plugins.renderengine.RenderEngineModel;
@@ -91,8 +92,7 @@ public class IfcOpenShellModel implements RenderEngineModel {
 			// Probably something went wrong with the processing of this element in
 			// the IfcOpenShell binary, as it has not been included in the enumerated
 			// set of elements with geometry.
-			LOGGER.warn(String.format("Entity #%d not found in model", oid));
-			return new IfcOpenShellEntityInstance(null);	
+			throw new EntityNotFoundException("Entity " + oid + " not found in model");
 		}
 	}
 	
