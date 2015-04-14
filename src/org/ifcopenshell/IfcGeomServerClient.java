@@ -70,7 +70,9 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 			m.write(dos);
 			
 			askForMore();
-		} catch (IOException e) {}
+		} catch (IOException e) {
+			LOGGER.error("", e);
+		}
 	}
 
 	private static final int HELLO     = 0xff00;

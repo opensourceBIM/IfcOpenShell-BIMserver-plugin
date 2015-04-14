@@ -106,7 +106,9 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 				}
 				FileUtils.forceMkdir(nativeFolder);
 				File file = new File(nativeFolder, executableName);
-				IOUtils.copy(inputStream, new FileOutputStream(file));
+				FileOutputStream fos = new FileOutputStream(file);
+				IOUtils.copy(inputStream, fos);
+				fos.close();
 				try {
 					file.setExecutable(true, false);
 				} catch (Exception e) {
