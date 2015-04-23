@@ -1,5 +1,7 @@
 package org.ifcopenshell;
 
+import org.bimserver.geometry.Matrix;
+
 public class IfcGeomServerClientEntity {
 	private int id;
 	private String guid;
@@ -24,7 +26,7 @@ public class IfcGeomServerClientEntity {
 		this.name = name;
 		this.type = type;
 		this.parentId = parentId;
-		this.matrix = matrix;
+		this.matrix = Matrix.changeOrientation(matrix);
 		this.repId = repId;
 		this.positions = positions;
 		this.normals = normals;

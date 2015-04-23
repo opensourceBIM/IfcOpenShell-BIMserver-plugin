@@ -34,6 +34,7 @@ import java.util.HashMap;
 
 import org.bimserver.plugins.renderengine.EntityNotFoundException;
 import org.bimserver.plugins.renderengine.RenderEngineException;
+import org.bimserver.plugins.renderengine.RenderEngineFilter;
 import org.bimserver.plugins.renderengine.RenderEngineInstance;
 import org.bimserver.plugins.renderengine.RenderEngineModel;
 import org.bimserver.plugins.renderengine.RenderEngineSettings;
@@ -102,5 +103,9 @@ public class IfcOpenShellModel implements RenderEngineModel {
 
 	@Override
 	public void setSettings(RenderEngineSettings settings) throws RenderEngineException {
+	}
+
+	@Override
+	public void setFilter(RenderEngineFilter renderEngineFilter) {
 	}
 }
