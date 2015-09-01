@@ -48,4 +48,9 @@ public class IfcOpenShellEntityInstance implements RenderEngineInstance {
 	public double getArea() throws RenderEngineException {
 		throw new NotImplementedException();
 	}
+	
+	@Override
+	public double getVolume() throws RenderEngineException {
+		throw new NotImplementedException();
+	}
 }
