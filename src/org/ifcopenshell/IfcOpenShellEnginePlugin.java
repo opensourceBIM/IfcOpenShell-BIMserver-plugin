@@ -27,11 +27,14 @@
 package org.ifcopenshell;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.Collections;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bimserver.models.store.ObjectDefinition;
 import org.bimserver.plugins.PluginConfiguration;
@@ -41,6 +44,7 @@ import org.bimserver.plugins.PluginManager;
 import org.bimserver.plugins.renderengine.RenderEngine;
 import org.bimserver.plugins.renderengine.RenderEngineException;
 import org.bimserver.plugins.renderengine.RenderEnginePlugin;
+import org.bimserver.utils.PathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,28 +100,35 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 			final String exePath = String.format("exe/%s/%s/%s", bitness, operatingSystem, executableName);
 			final InputStream inputStream = pluginContext.getResourceAsInputStream(exePath);
 			if (inputStream != null) {
-				File nativeFolder = new File(pluginManager.getTempDir(), "IfcOpenShellEngine");
-				if (nativeFolder.exists()) {
-					try {
-						FileUtils.deleteDirectory(nativeFolder);
-					} catch (IOException e) {
-						// Ignore
-					}
-				}
-				FileUtils.forceMkdir(nativeFolder);
-				File file = new File(nativeFolder, executableName);
-				FileOutputStream fos = new FileOutputStream(file);
-				IOUtils.copy(inputStream, fos);
-				fos.close();
 				try {
-					file.setExecutable(true, false);
-				} catch (Exception e) {
-					// Ignore.. permission bit tested below
-				}
-				this.filename = file.getAbsolutePath();
-				initialized = new File(filename).canExecute();
-				if (initialized) {
-					LOGGER.info("Using " + exePath);
+					Path nativeFolder = pluginManager.getTempDir().resolve("IfcOpenShellEngine");
+					if (Files.exists(nativeFolder)) {
+						try {
+							PathUtils.removeDirectoryWithContent(nativeFolder);
+						} catch (IOException e) {
+							// Ignore
+						}
+					}
+					Files.createDirectories(nativeFolder);
+					Path file = nativeFolder.resolve(executableName);
+					OutputStream outputStream = Files.newOutputStream(file);
+					try {
+						IOUtils.copy(inputStream, outputStream);
+					} finally {
+						outputStream.close();
+					}
+					try {
+						Files.setPosixFilePermissions(file, Collections.singleton(PosixFilePermission.OWNER_EXECUTE));
+					} catch (Exception e) {
+						// Ignore.. permission bit tested below
+					}
+					this.filename = file.toString();
+					initialized = new File(filename).canExecute();
+					if (initialized) {
+						LOGGER.info("Using " + exePath);
+					}					
+				} finally {
+					inputStream.close();
 				}
 			}
 		} catch (Exception e) {
