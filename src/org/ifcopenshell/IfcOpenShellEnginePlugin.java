@@ -98,7 +98,7 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		try {
 			final String bitness = operatingSystem.equals("osx") ? "64" : System.getProperty("sun.arch.data.model");
 			final String exePath = String.format("exe/%s/%s/%s", bitness, operatingSystem, executableName);
-			final InputStream inputStream = pluginContext.getResourceAsInputStream(exePath);
+			final InputStream inputStream = Files.newInputStream(pluginContext.getRootPath().resolve(exePath));
 			if (inputStream != null) {
 				try {
 					Path nativeFolder = pluginManager.getTempDir().resolve("IfcOpenShellEngine");
