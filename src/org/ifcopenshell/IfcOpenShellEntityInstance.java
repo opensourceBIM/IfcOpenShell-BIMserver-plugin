@@ -32,7 +32,7 @@ public class IfcOpenShellEntityInstance implements RenderEngineInstance {
 	}
 
 	@Override
-	public float[] getTransformationMatrix() {
+	public double[] getTransformationMatrix() {
 		return entity.getMatrix();
 	}
 

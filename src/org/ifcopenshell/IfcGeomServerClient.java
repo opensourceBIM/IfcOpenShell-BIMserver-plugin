@@ -133,6 +133,25 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 			return fs;
 		}
 		
+		protected double[] readDoubleArray(LittleEndianDataInputStream s) throws IOException {
+			int len = s.readInt() / 4;
+			double[] fs = new double[len];
+			for (int i = 0; i < len; ++i) {
+				fs[i] = s.readDouble();
+			}
+			return fs;
+		}
+
+		protected double[] readDoubleWhichShouldBeFloatArray(LittleEndianDataInputStream s) throws IOException {
+			int len = s.readInt() / 4;
+			double[] fs = new double[len];
+			for (int i = 0; i < len; ++i) {
+				// TODO ask IOS to return doubles
+				fs[i] = s.readFloat();
+			}
+			return fs;
+		}
+		
 		protected int[] readIntArray(LittleEndianDataInputStream s) throws IOException {
 			int len = s.readInt() / 4;
 			int[] is = new int[len];
@@ -279,7 +298,7 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 				readString(s),
 				readString(s),
 				s.readInt(),
-				readFloatArray(s),
+				readDoubleWhichShouldBeFloatArray(s),
 				s.readInt(),
 				readFloatArray(s),
 				readFloatArray(s),

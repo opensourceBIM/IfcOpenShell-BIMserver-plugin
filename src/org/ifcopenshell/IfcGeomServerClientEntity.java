@@ -8,7 +8,7 @@ public class IfcGeomServerClientEntity {
 	private String name;
 	private String type;
 	private int parentId;
-	private float[] matrix;
+	private double[] matrix;
 	private int repId;
 	private float[] positions;
 	private float[] normals;
@@ -17,7 +17,7 @@ public class IfcGeomServerClientEntity {
 	private int[] materialIndices;
 	
 	public IfcGeomServerClientEntity(int id, String guid, String name,
-			String type, int parentId, float[] matrix, int repId,
+			String type, int parentId, double[] matrix, int repId,
 			float[] positions, float[] normals, int[] indices, float[] colors,
 			int[] materialIndices) {
 		super();
@@ -55,7 +55,7 @@ public class IfcGeomServerClientEntity {
 		return parentId;
 	}
 
-	public float[] getMatrix() {
+	public double[] getMatrix() {
 		return matrix;
 	}
 
