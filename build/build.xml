@@ -1,0 +1,18 @@
+<project name="IfcOpenShellPlugin" default="IfcOpenShellPlugin">
+	<target name="IfcOpenShellPlugin">
+		<mkdir dir="build" />
+		<javac destdir="build" debug="on" includeantruntime="false">
+			<src path="../src" />
+			<classpath>
+				<path>
+				</path>
+			</classpath>
+		</javac>
+		<copy todir="build">
+			<fileset dir="exe"></fileset>
+			<fileset dir="plugin"></fileset>
+		</copy>
+		<jar basedir="build" file="ifcopenshell-${VERSION}.jar">
+		</jar>
+	</target>
+</project>

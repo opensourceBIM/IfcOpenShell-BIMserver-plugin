@@ -19,7 +19,6 @@
 
 package org.ifcopenshell;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.bimserver.plugins.renderengine.RenderEngineException;
 import org.bimserver.plugins.renderengine.RenderEngineGeometry;
 import org.bimserver.plugins.renderengine.RenderEngineInstance;
@@ -46,11 +45,11 @@ public class IfcOpenShellEntityInstance implements RenderEngineInstance {
 
 	@Override
 	public double getArea() throws RenderEngineException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	
 	@Override
 	public double getVolume() throws RenderEngineException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 }
