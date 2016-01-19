@@ -7,7 +7,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	<description>BIMserver plugin that uses IfcOpenShell to generates geometry from IFC files</description>
+	<description>BIMserver plugin that uses IfcOpenShell to generate geometry from IFC files</description>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<resources>
