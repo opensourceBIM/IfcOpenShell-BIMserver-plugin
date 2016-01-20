@@ -118,7 +118,7 @@
 		<dependency>
 			<groupId>org.opensourcebim</groupId>
 			<artifactId>PluginBase</artifactId>
-			<version>1.5.7</version>
+			<version>1.5.9-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<scm>
@@ -135,7 +135,7 @@
 		<system>GitHub</system>
 		<url>https://github.com/opensourceBIM/IfcOpenShell-BIMserver-plugin/issues</url>
 	</issueManagement>
-	<name>BuildingSMARTLibrary</name>
+	<name>IfcOpenShellPlugin</name>
 	<url>https://github.com/opensourceBIM/IfcOpenShell-BIMserver-plugin</url>
 	<licenses>
 		<license>
