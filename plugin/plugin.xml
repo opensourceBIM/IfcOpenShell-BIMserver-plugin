@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PluginDescriptor>              
-        <PluginImplementation>
-                <interfaceClass>org.bimserver.plugins.renderengine.RenderEnginePlugin</interfaceClass>
-                <implementationClass>org.ifcopenshell.IfcOpenShellEnginePlugin</implementationClass>
-                <enabled>true</enabled>
-        </PluginImplementation>
+<PluginDescriptor>
+	<PluginImplementation>
+		<interfaceClass>org.bimserver.plugins.renderengine.RenderEnginePlugin</interfaceClass>
+		<implementationClass>org.ifcopenshell.IfcOpenShellEnginePlugin</implementationClass>
+		<description>Open source IFC geometry engine visit &lt;a href=&apos;http://ifcopenshell.org&apos;&gt;ifcopenshell.org&lt;/a&gt;</description>
+		<enabled>true</enabled>
+	</PluginImplementation>
 </PluginDescriptor>

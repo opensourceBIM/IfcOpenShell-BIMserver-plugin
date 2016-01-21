@@ -64,20 +64,6 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	}
 
 	@Override
-	public String getDescription() {
-		return "Open source IFC geometry engine<br>visit <a href='http://ifcopenshell.org'>ifcopenshell.org</a>";
-	}
-
-	public static String getVersionStatic() {
-		return "0.5.0-dev";
-	}
-
-	@Override
-	public String getVersion() {
-		return getVersionStatic();
-	}
-
-	@Override
 	public void init(PluginManagerInterface pluginManager) throws PluginException {
 		PluginContext pluginContext = pluginManager.getPluginContext(this);
 		final String os = System.getProperty("os.name").toLowerCase();
@@ -137,11 +123,6 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		if (!initialized) {
 			throw new PluginException(String.format("No executable found for the %s platorm", os));
 		}
-	}
-
-	@Override
-	public boolean isInitialized() {
-		return initialized;
 	}
 
 	@Override
