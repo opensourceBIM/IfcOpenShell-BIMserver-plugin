@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PluginDescriptor>
+	<LogoSmall>logo32.png</LogoSmall>
 	<PluginImplementation>
 		<interfaceClass>org.bimserver.plugins.renderengine.RenderEnginePlugin</interfaceClass>
 		<implementationClass>org.ifcopenshell.IfcOpenShellEnginePlugin</implementationClass>
