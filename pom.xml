@@ -59,7 +59,7 @@
 						<configuration>
 							<artifacts>
 								<artifact>
-									<file>img/icon.png</file>
+									<file>icon.png</file>
 									<type>png</type>
 									<classifier>icon</classifier>
 								</artifact>
