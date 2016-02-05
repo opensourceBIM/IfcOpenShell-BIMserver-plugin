@@ -39,7 +39,6 @@ import org.apache.commons.io.IOUtils;
 import org.bimserver.models.store.ObjectDefinition;
 import org.bimserver.plugins.PluginConfiguration;
 import org.bimserver.plugins.PluginContext;
-import org.bimserver.plugins.PluginManagerInterface;
 import org.bimserver.plugins.renderengine.RenderEngine;
 import org.bimserver.plugins.renderengine.RenderEngineException;
 import org.bimserver.plugins.renderengine.RenderEnginePlugin;
@@ -64,8 +63,7 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	}
 
 	@Override
-	public void init(PluginManagerInterface pluginManager) throws PluginException {
-		PluginContext pluginContext = pluginManager.getPluginContext(this);
+	public void init(PluginContext pluginContext) throws PluginException {
 		final String os = System.getProperty("os.name").toLowerCase();
 		final String executableName;
 		final String operatingSystem;
@@ -87,7 +85,7 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 			final InputStream inputStream = Files.newInputStream(pluginContext.getRootPath().resolve(exePath));
 			if (inputStream != null) {
 				try {
-					Path nativeFolder = pluginManager.getTempDir().resolve("IfcOpenShellEngine");
+					Path nativeFolder = pluginContext.getTempDir();
 					if (Files.exists(nativeFolder)) {
 						try {
 							PathUtils.removeDirectoryWithContent(nativeFolder);
@@ -123,11 +121,6 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		if (!initialized) {
 			throw new PluginException(String.format("No executable found for the %s platorm", os));
 		}
-	}
-
-	@Override
-	public String getDefaultName() {
-		return "IfcOpenShell Engine";
 	}
 
 	@Override
