@@ -29,6 +29,7 @@
 
 package org.ifcopenshell;
 
+import java.io.EOFException;
 import java.io.InputStream;
 import java.util.HashMap;
 
@@ -76,6 +77,8 @@ public class IfcOpenShellModel implements RenderEngineModel {
 				IfcOpenShellEntityInstance instance = new IfcOpenShellEntityInstance(e);
 				instancesById.put(e.getId(), instance);
 			}
+		} catch (RenderEngineException e) {
+			throw (RenderEngineException)e;
 		} catch (Exception e) {
 			LOGGER.error(IfcGeomServerClient.class.getName(), e);
 		}

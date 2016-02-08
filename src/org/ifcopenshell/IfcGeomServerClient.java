@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.Iterator;
 
 import org.apache.commons.io.IOUtils;
+import org.bimserver.plugins.renderengine.RenderEngineException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +47,7 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 		return this;
 	}
 	
-	public IfcGeomServerClient(String executableFilename, InputStream ifcInputStream) {
+	public IfcGeomServerClient(String executableFilename, InputStream ifcInputStream) throws RenderEngineException {
 		try {
 			process = Runtime.getRuntime().exec(executableFilename);
 			dos = new LittleEndianDataOutputStream(process.getOutputStream());
@@ -71,7 +72,7 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 			
 			askForMore();
 		} catch (IOException e) {
-			LOGGER.error("", e);
+			throw new RenderEngineException(e);
 		}
 	}
 
