@@ -29,7 +29,6 @@
 
 package org.ifcopenshell;
 
-import java.io.EOFException;
 import java.io.InputStream;
 import java.util.HashMap;
 
@@ -85,7 +84,7 @@ public class IfcOpenShellModel implements RenderEngineModel {
 		
 		final double t1 = (double) System.nanoTime();
 		
-		LOGGER.info(String.format("Took %.2f seconds to obtain representations for %d entities", (t1-t0) / 1.E9, instancesById.size()));
+		LOGGER.debug(String.format("Took %.2f seconds to obtain representations for %d entities", (t1-t0) / 1.E9, instancesById.size()));
 	}
 
 	@Override

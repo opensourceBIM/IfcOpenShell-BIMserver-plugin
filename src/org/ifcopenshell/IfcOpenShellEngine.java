@@ -26,9 +26,6 @@
 
 package org.ifcopenshell;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -58,26 +55,12 @@ public class IfcOpenShellEngine implements RenderEngine {
 	}
 
 	@Override
-	public RenderEngineModel openModel(File ifcFile) throws RenderEngineException {
-		try {
-			return openModel(new FileInputStream(ifcFile),(int)ifcFile.length());
-		} catch (IOException e) {
-			throw new RenderEngineException("Failed to open model");		
-		}
-	}
-
-	@Override
-	public RenderEngineModel openModel(InputStream inputStream, int size) throws RenderEngineException {
+	public RenderEngineModel openModel(InputStream inputStream, long size) throws RenderEngineException {
 		return new IfcOpenShellModel(filename, inputStream);
 	}
 
 	@Override
 	public RenderEngineModel openModel(InputStream inputStream) throws RenderEngineException {
 		return new IfcOpenShellModel(filename, inputStream);
-	}
-
-	@Override
-	public RenderEngineModel openModel(byte[] bytes) throws RenderEngineException {
-		return new IfcOpenShellModel(filename, new ByteArrayInputStream(bytes));
 	}
 }

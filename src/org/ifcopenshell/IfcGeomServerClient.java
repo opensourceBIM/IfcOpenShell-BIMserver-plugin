@@ -66,7 +66,7 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 				LOGGER.error(String.format("Version mismatch: Plugin version %s does not match IfcOpenShell version %s", VERSION, reportedVersion));
 				return;
 			}
-			
+
 			IfcModel m = new IfcModel(ifcInputStream);
 			m.write(dos);
 			
