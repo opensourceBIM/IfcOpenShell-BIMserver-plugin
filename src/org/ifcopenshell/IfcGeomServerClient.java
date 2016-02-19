@@ -21,9 +21,12 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 	private LittleEndianDataInputStream dis = null;
 	private LittleEndianDataOutputStream dos = null;
 	private boolean hasMore = false;
+
+	private volatile boolean running = true;
 	
 	@Override
 	public void close() throws Exception {
+		running = false;
 		terminate();
 	}
 	
@@ -47,7 +50,7 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 		return this;
 	}
 	
-	public IfcGeomServerClient(String executableFilename, InputStream ifcInputStream) throws RenderEngineException {
+	public IfcGeomServerClient(String executableFilename) throws RenderEngineException {
 		try {
 			process = Runtime.getRuntime().exec(executableFilename);
 			dos = new LittleEndianDataOutputStream(process.getOutputStream());
@@ -66,13 +69,22 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 				LOGGER.error(String.format("Version mismatch: Plugin version %s does not match IfcOpenShell version %s", VERSION, reportedVersion));
 				return;
 			}
-
-			IfcModel m = new IfcModel(ifcInputStream);
-			m.write(dos);
-			
-			askForMore();
 		} catch (IOException e) {
 			throw new RenderEngineException(e);
+		}
+	}
+	
+	public void loadModel(InputStream inputStream) throws RenderEngineException {
+		IfcModel m = new IfcModel(inputStream);
+		try {
+			m.write(dos);
+			askForMore();
+		} catch (IOException e) {
+			try {
+				close();
+			} catch (Exception e1) {
+				throw new RenderEngineException(e1);
+			}
 		}
 	}
 
@@ -447,5 +459,9 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 			terminate();
 			return null;
 		}
+	}
+
+	public boolean isRunning() {
+		return running;
 	}
 }

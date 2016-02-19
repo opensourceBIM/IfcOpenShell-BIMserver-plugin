@@ -39,6 +39,7 @@ public class IfcOpenShellEngine implements RenderEngine {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IfcOpenShellEngine.class);
 	public static final Boolean debug = false;
 	private String filename;
+	private IfcGeomServerClient client;
 
 	public IfcOpenShellEngine(String fn) throws IOException {
 		filename = fn;
@@ -47,6 +48,8 @@ public class IfcOpenShellEngine implements RenderEngine {
 	@Override
 	public void init() throws RenderEngineException {
 		LOGGER.info("Initializing IfcOpenShell engine");
+		
+		client = new IfcGeomServerClient(filename);
 	}
 	
 	@Override
@@ -56,11 +59,18 @@ public class IfcOpenShellEngine implements RenderEngine {
 
 	@Override
 	public RenderEngineModel openModel(InputStream inputStream, long size) throws RenderEngineException {
-		return new IfcOpenShellModel(filename, inputStream);
+		return openModel(inputStream);
 	}
 
 	@Override
 	public RenderEngineModel openModel(InputStream inputStream) throws RenderEngineException {
-		return new IfcOpenShellModel(filename, inputStream);
+		if (!client.isRunning()) {
+			client = new IfcGeomServerClient(filename);
+		}
+		try {
+			return new IfcOpenShellModel(client, filename, inputStream);
+		} catch (IOException e) {
+			throw new RenderEngineException(e);
+		}
 	}
 }

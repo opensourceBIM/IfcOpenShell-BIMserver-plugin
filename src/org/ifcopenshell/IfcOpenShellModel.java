@@ -29,6 +29,7 @@
 
 package org.ifcopenshell;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
@@ -48,16 +49,26 @@ public class IfcOpenShellModel implements RenderEngineModel {
 	private InputStream ifcInputStream;
 
 	private HashMap<Integer,IfcOpenShellEntityInstance> instancesById;
+
+	private IfcGeomServerClient client;
 	
-	public IfcOpenShellModel(String filename, InputStream ifcInputStream) throws RenderEngineException {
+	public IfcOpenShellModel(IfcGeomServerClient client, String filename, InputStream ifcInputStream) throws RenderEngineException, IOException {
+		this.client = client;
 		this.filename = filename;
 		this.ifcInputStream = ifcInputStream;
+		
+		client.loadModel(ifcInputStream);
 	}
 
 	@Override
 	public void close() throws RenderEngineException {
 		if (instancesById != null) {
 			instancesById.clear();
+		}
+		try {
+			ifcInputStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -68,18 +79,12 @@ public class IfcOpenShellModel implements RenderEngineModel {
 		
 		final double t0 = (double) System.nanoTime();
 
-		try (IfcGeomServerClient client = new IfcGeomServerClient(filename, ifcInputStream)) {
-			for (IfcGeomServerClientEntity e : client) {
-				if (e == null) break;
-				
-				// Store the instance in our dictionary
-				IfcOpenShellEntityInstance instance = new IfcOpenShellEntityInstance(e);
-				instancesById.put(e.getId(), instance);
-			}
-		} catch (RenderEngineException e) {
-			throw (RenderEngineException)e;
-		} catch (Exception e) {
-			LOGGER.error(IfcGeomServerClient.class.getName(), e);
+		for (IfcGeomServerClientEntity e : client) {
+			if (e == null) break;
+			
+			// Store the instance in our dictionary
+			IfcOpenShellEntityInstance instance = new IfcOpenShellEntityInstance(e);
+			instancesById.put(e.getId(), instance);
 		}
 		
 		final double t1 = (double) System.nanoTime();
