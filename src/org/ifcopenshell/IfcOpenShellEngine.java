@@ -47,14 +47,14 @@ public class IfcOpenShellEngine implements RenderEngine {
 
 	@Override
 	public void init() throws RenderEngineException {
-		LOGGER.info("Initializing IfcOpenShell engine");
+		LOGGER.debug("Initializing IfcOpenShell engine");
 		
 		client = new IfcGeomServerClient(filename);
 	}
 	
 	@Override
 	public void close() {
-		LOGGER.info("Closing IfcOpenShell engine");
+		LOGGER.debug("Closing IfcOpenShell engine");
 	}
 
 	@Override

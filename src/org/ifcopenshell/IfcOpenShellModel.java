@@ -76,15 +76,14 @@ public class IfcOpenShellModel implements RenderEngineModel {
 	public void generateGeneralGeometry() throws RenderEngineException {
 		// We keep track of instances ourselves
 		instancesById = new HashMap<Integer,IfcOpenShellEntityInstance>();
-		
+
 		final double t0 = (double) System.nanoTime();
 
-		for (IfcGeomServerClientEntity e : client) {
-			if (e == null) break;
-			
+		while (client.hasNext()) {
+			IfcGeomServerClientEntity next = client.getNext();
 			// Store the instance in our dictionary
-			IfcOpenShellEntityInstance instance = new IfcOpenShellEntityInstance(e);
-			instancesById.put(e.getId(), instance);
+			IfcOpenShellEntityInstance instance = new IfcOpenShellEntityInstance(next);
+			instancesById.put(next.getId(), instance);
 		}
 		
 		final double t1 = (double) System.nanoTime();

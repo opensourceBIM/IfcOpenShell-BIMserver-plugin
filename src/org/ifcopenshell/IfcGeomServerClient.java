@@ -3,7 +3,6 @@ package org.ifcopenshell;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
 
 import org.apache.commons.io.IOUtils;
 import org.bimserver.plugins.renderengine.RenderEngineException;
@@ -14,7 +13,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.LittleEndianDataInputStream;
 import com.google.common.io.LittleEndianDataOutputStream;
 
-public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServerClientEntity>, Iterable<IfcGeomServerClientEntity> {
+public class IfcGeomServerClient implements AutoCloseable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IfcGeomServerClient.class);
 	
 	private Process process = null;
@@ -25,29 +24,9 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 	private volatile boolean running = true;
 	
 	@Override
-	public void close() throws Exception {
+	public void close() throws RenderEngineException {
 		running = false;
 		terminate();
-	}
-	
-	@Override
-	public boolean hasNext() {
-		return hasMore;
-	}
-
-	@Override
-	public IfcGeomServerClientEntity next() {
-		return getNext();
-	}
-
-	@Override
-	public void remove() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Iterator<IfcGeomServerClientEntity> iterator() {
-		return this;
 	}
 	
 	public IfcGeomServerClient(String executableFilename) throws RenderEngineException {
@@ -80,11 +59,7 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 			m.write(dos);
 			askForMore();
 		} catch (IOException e) {
-			try {
-				close();
-			} catch (Exception e1) {
-				throw new RenderEngineException(e1);
-			}
+			close();
 		}
 	}
 
@@ -367,7 +342,7 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 		}
 	}
 	
-	private void terminate() {
+	private void terminate() throws RenderEngineException {
 		hasMore = false;
 		if (process == null) return;
 		
@@ -404,7 +379,8 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 		for (int n = 0;;) {
 			try {
 				if (process.exitValue() != 0) {
-					LOGGER.error(String.format("Exited with non-zero exit code: %d", process.exitValue()));
+//					LOGGER.error(String.format("Exited with non-zero exit code: %d", process.exitValue()));
+					throw new RenderEngineException(String.format("Exited with non-zero exit code: %d", process.exitValue()));
 				}
 				break;
 			} catch (IllegalThreadStateException e) {
@@ -437,7 +413,7 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 		hasMore = mr.hasMore();
 	}
 	
-	private IfcGeomServerClientEntity getNext() {
+	public IfcGeomServerClientEntity getNext() throws RenderEngineException {
 		try {
 			Get g = new Get();
 			g.write(dos);
@@ -463,5 +439,9 @@ public class IfcGeomServerClient implements AutoCloseable, Iterator<IfcGeomServe
 
 	public boolean isRunning() {
 		return running;
+	}
+
+	public boolean hasNext() {
+		return hasMore;
 	}
 }
