@@ -52,7 +52,25 @@ public class IfcGeomServerClient implements AutoCloseable {
 			throw new RenderEngineException(e);
 		}
 	}
-	
+
+	public void setDeflection(double deflection) throws RenderEngineException {
+		try {
+			Deflection d = new Deflection(deflection);
+			d.write(dos);
+		} catch (IOException e) {
+			throw new RenderEngineException(e);
+		}
+	}
+
+	public void setLayerSetSlicing(boolean enable) throws RenderEngineException {
+		try {
+			Setting s = new Setting(Setting.SettingId.APPLY_LAYERSETS, enable);
+			s.write(dos);
+		} catch (IOException e) {
+			throw new RenderEngineException(e);
+		}
+	}
+
 	public void loadModel(InputStream inputStream) throws RenderEngineException {
 		IfcModel m = new IfcModel(inputStream);
 		try {
@@ -63,18 +81,20 @@ public class IfcGeomServerClient implements AutoCloseable {
 		}
 	}
 
-	private static final int HELLO     = 0xff00;
-	private static final int IFC_MODEL = HELLO     + 1;
-	private static final int GET       = IFC_MODEL + 1;
-	private static final int ENTITY    = GET       + 1;
-	private static final int MORE      = ENTITY    + 1;
-	private static final int NEXT      = MORE      + 1;
-	private static final int BYE       = NEXT      + 1;
-	private static final int GET_LOG   = BYE       + 1;
-	private static final int LOG       = GET_LOG   + 1;
-	
-	private static String VERSION = "IfcOpenShell-0.5.0-dev";
-	
+	private static final int HELLO      = 0xff00;
+	private static final int IFC_MODEL  = HELLO      + 1;
+	private static final int GET        = IFC_MODEL  + 1;
+	private static final int ENTITY     = GET        + 1;
+	private static final int MORE       = ENTITY     + 1;
+	private static final int NEXT       = MORE       + 1;
+	private static final int BYE        = NEXT       + 1;
+	private static final int GET_LOG    = BYE        + 1;
+	private static final int LOG        = GET_LOG    + 1;
+	private static final int DEFLECTION = LOG        + 1;
+	private static final int SETTING    = DEFLECTION + 1;
+
+	private static String VERSION = "IfcOpenShell-0.5.0-dev-2";
+
 	abstract static class Command {
 		abstract void read_contents(LittleEndianDataInputStream s) throws IOException;
 		abstract void write_contents(LittleEndianDataOutputStream s) throws IOException;
@@ -341,7 +361,58 @@ public class IfcGeomServerClient implements AutoCloseable {
 			return string;
 		}
 	}
-	
+
+	static class Deflection extends Command {
+		private double deflection;
+
+		Deflection(double deflection) {
+			super(DEFLECTION);
+			this.deflection = deflection;
+		}
+
+		@Override
+		void read_contents(LittleEndianDataInputStream s) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		void write_contents(LittleEndianDataOutputStream s) {
+			s.writeDouble(deflection);
+		}
+	}
+
+	static class Setting extends Command {
+		private int id;
+		private int value;
+
+		public enum SettingId {
+			APPLY_LAYERSETS (1 << 17);
+
+			private final int id;
+			SettingId(int id) {
+				this.id = id;
+			}
+			private int getId() { return id; }
+		}
+
+		Setting(SettingId i, boolean b) {
+			super(SETTING);
+			this.id = i.getId();
+			this.value = b ? 1 : 0;
+		}
+
+		@Override
+		void read_contents(LittleEndianDataInputStream s) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		void write_contents(LittleEndianDataOutputStream s) {
+			s.writeInt(id);
+			s.writeInt(value);
+		}
+	}
+
 	private void terminate() throws RenderEngineException {
 		hasMore = false;
 		if (process == null) return;
