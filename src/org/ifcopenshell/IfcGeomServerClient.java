@@ -473,7 +473,8 @@ public class IfcGeomServerClient implements AutoCloseable {
 	
 	private void askForMore() throws IOException {
 		hasMore = false;
-		if (dis.readInt() != MORE) {
+		int readInt = dis.readInt();
+		if (readInt != MORE) {
 			LOGGER.error("Invalid command sequence encountered");
 			throw new IOException();
 		}
