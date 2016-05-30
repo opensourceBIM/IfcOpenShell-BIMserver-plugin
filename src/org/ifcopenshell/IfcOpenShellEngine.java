@@ -40,9 +40,11 @@ public class IfcOpenShellEngine implements RenderEngine {
 	public static final Boolean debug = false;
 	private String filename;
 	private IfcGeomServerClient client;
+	private Double maxDeflection;
 
-	public IfcOpenShellEngine(String fn) throws IOException {
+	public IfcOpenShellEngine(String fn, Double maxDeflection) throws IOException {
 		filename = fn;
+		this.maxDeflection = maxDeflection;
 	}
 
 	@Override
@@ -50,6 +52,7 @@ public class IfcOpenShellEngine implements RenderEngine {
 		LOGGER.debug("Initializing IfcOpenShell engine");
 		
 		client = new IfcGeomServerClient(filename);
+		client.setDeflection(maxDeflection);
 	}
 	
 	@Override
@@ -68,7 +71,8 @@ public class IfcOpenShellEngine implements RenderEngine {
 			client = new IfcGeomServerClient(filename);
 		}
 		try {
-			return new IfcOpenShellModel(client, filename, inputStream);
+			IfcOpenShellModel model = new IfcOpenShellModel(client, filename, inputStream);
+			return model;
 		} catch (IOException e) {
 			throw new RenderEngineException(e);
 		}

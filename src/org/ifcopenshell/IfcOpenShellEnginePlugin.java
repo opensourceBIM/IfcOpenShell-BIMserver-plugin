@@ -36,7 +36,12 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.Collections;
 
 import org.apache.commons.io.IOUtils;
+import org.bimserver.models.store.DoubleType;
 import org.bimserver.models.store.ObjectDefinition;
+import org.bimserver.models.store.ParameterDefinition;
+import org.bimserver.models.store.PrimitiveDefinition;
+import org.bimserver.models.store.PrimitiveEnum;
+import org.bimserver.models.store.StoreFactory;
 import org.bimserver.plugins.PluginConfiguration;
 import org.bimserver.plugins.PluginContext;
 import org.bimserver.plugins.renderengine.RenderEngine;
@@ -48,6 +53,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
+	private static final String MAX_DEFLECTION = "maxdeflection";
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(IfcOpenShellEnginePlugin.class);
 	
 	private boolean initialized = false;
@@ -56,7 +63,7 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	@Override
 	public RenderEngine createRenderEngine(PluginConfiguration pluginConfiguration, String schema) throws RenderEngineException {
 		try {
-			return new IfcOpenShellEngine(filename);
+			return new IfcOpenShellEngine(filename, pluginConfiguration.getDouble(MAX_DEFLECTION));
 		} catch (IOException e) {
 			throw new RenderEngineException(e);
 		}
@@ -125,6 +132,22 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 
 	@Override
 	public ObjectDefinition getSettingsDefinition() {
-		return null;
+		ObjectDefinition objectDefinition = StoreFactory.eINSTANCE.createObjectDefinition();
+		
+		DoubleType defaultDeflection = StoreFactory.eINSTANCE.createDoubleType();
+		defaultDeflection.setValue(1);
+		
+		PrimitiveDefinition doubleType = StoreFactory.eINSTANCE.createPrimitiveDefinition();
+		doubleType.setType(PrimitiveEnum.DOUBLE);
+		
+		ParameterDefinition deflectionParameter = StoreFactory.eINSTANCE.createParameterDefinition();
+		deflectionParameter.setName("Max deflection (mm)");
+		deflectionParameter.setIdentifier(MAX_DEFLECTION);
+		deflectionParameter.setDefaultValue(defaultDeflection);
+		deflectionParameter.setDescription("Maximum deflection in millimeters");
+		deflectionParameter.setType(doubleType);
+		objectDefinition.getParameters().add(deflectionParameter);
+		
+		return objectDefinition;
 	}
 }

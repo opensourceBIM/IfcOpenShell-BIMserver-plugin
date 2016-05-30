@@ -376,7 +376,7 @@ public class IfcGeomServerClient implements AutoCloseable {
 		}
 
 		@Override
-		void write_contents(LittleEndianDataOutputStream s) {
+		void write_contents(LittleEndianDataOutputStream s) throws IOException {
 			s.writeDouble(deflection);
 		}
 	}
@@ -407,7 +407,7 @@ public class IfcGeomServerClient implements AutoCloseable {
 		}
 
 		@Override
-		void write_contents(LittleEndianDataOutputStream s) {
+		void write_contents(LittleEndianDataOutputStream s) throws IOException {
 			s.writeInt(id);
 			s.writeInt(value);
 		}
