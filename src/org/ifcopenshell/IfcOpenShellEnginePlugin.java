@@ -36,6 +36,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.Collections;
 
 import org.apache.commons.io.IOUtils;
+import org.bimserver.models.store.BooleanType;
 import org.bimserver.models.store.DoubleType;
 import org.bimserver.models.store.ObjectDefinition;
 import org.bimserver.models.store.ParameterDefinition;
@@ -54,6 +55,7 @@ import org.slf4j.LoggerFactory;
 
 public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	private static final String MAX_DEFLECTION = "maxdeflection";
+	private static final String LAYER_SET_SLICING = "layersetslicing";
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(IfcOpenShellEnginePlugin.class);
 	
@@ -63,7 +65,7 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	@Override
 	public RenderEngine createRenderEngine(PluginConfiguration pluginConfiguration, String schema) throws RenderEngineException {
 		try {
-			return new IfcOpenShellEngine(filename, pluginConfiguration.getDouble(MAX_DEFLECTION));
+			return new IfcOpenShellEngine(filename, pluginConfiguration.getDouble(MAX_DEFLECTION), pluginConfiguration.getBoolean(LAYER_SET_SLICING));
 		} catch (IOException e) {
 			throw new RenderEngineException(e);
 		}
@@ -136,9 +138,15 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		
 		DoubleType defaultDeflection = StoreFactory.eINSTANCE.createDoubleType();
 		defaultDeflection.setValue(1);
+
+		BooleanType defaultLayerSetSlicing = StoreFactory.eINSTANCE.createBooleanType();
+		defaultLayerSetSlicing.setValue(false);
 		
 		PrimitiveDefinition doubleType = StoreFactory.eINSTANCE.createPrimitiveDefinition();
 		doubleType.setType(PrimitiveEnum.DOUBLE);
+
+		PrimitiveDefinition booleanType = StoreFactory.eINSTANCE.createPrimitiveDefinition();
+		booleanType.setType(PrimitiveEnum.BOOLEAN);
 		
 		ParameterDefinition deflectionParameter = StoreFactory.eINSTANCE.createParameterDefinition();
 		deflectionParameter.setName("Max deflection (mm)");
@@ -147,6 +155,14 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		deflectionParameter.setDescription("Maximum deflection in millimeters");
 		deflectionParameter.setType(doubleType);
 		objectDefinition.getParameters().add(deflectionParameter);
+
+		ParameterDefinition layerSetSlicingParameter = StoreFactory.eINSTANCE.createParameterDefinition();
+		layerSetSlicingParameter.setName("Layerset slicing");
+		layerSetSlicingParameter.setIdentifier(LAYER_SET_SLICING);
+		layerSetSlicingParameter.setDefaultValue(defaultLayerSetSlicing);
+		layerSetSlicingParameter.setDescription("Whether to do layerset slicing (http://blog.ifcopenshell.org/2015/10/separating-elements-by-their-material.html)");
+		layerSetSlicingParameter.setType(booleanType);
+		objectDefinition.getParameters().add(layerSetSlicingParameter);
 		
 		return objectDefinition;
 	}

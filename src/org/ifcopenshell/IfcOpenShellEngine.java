@@ -40,11 +40,13 @@ public class IfcOpenShellEngine implements RenderEngine {
 	public static final Boolean debug = false;
 	private String filename;
 	private IfcGeomServerClient client;
-	private Double maxDeflection;
+	private double maxDeflection;
+	private boolean layerSetSlicing;
 
-	public IfcOpenShellEngine(String fn, Double maxDeflection) throws IOException {
+	public IfcOpenShellEngine(String fn, double maxDeflection, boolean layerSetSlicing) throws IOException {
 		filename = fn;
 		this.maxDeflection = maxDeflection;
+		this.layerSetSlicing = layerSetSlicing;
 	}
 
 	@Override
@@ -53,6 +55,7 @@ public class IfcOpenShellEngine implements RenderEngine {
 		
 		client = new IfcGeomServerClient(filename);
 		client.setDeflection(maxDeflection);
+		client.setLayerSetSlicing(layerSetSlicing);
 	}
 	
 	@Override
