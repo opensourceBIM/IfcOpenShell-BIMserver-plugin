@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.opensourcebim</groupId>
 	<artifactId>ifcopenshellplugin</artifactId>
-	<version>0.5.14</version>
+	<version>0.5.15-SNAPSHOT</version>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -179,7 +179,7 @@
 		<url>https://github.com/opensourceBIM/IfcOpenShell-BIMserver-plugin.git</url>
 		<connection>scm:git:https://github.com/opensourceBIM/IfcOpenShell-BIMserver-plugin.git</connection>
 		<developerConnection>scm:git:https://github.com/opensourceBIM/IfcOpenShell-BIMserver-plugin.git</developerConnection>
-		<tag>ifcopenshellplugin-0.5.14</tag>
+		<tag>HEAD</tag>
 	</scm>
 	<organization>
 		<name>OpenSource BIM</name>
