@@ -31,6 +31,7 @@ package org.ifcopenshell;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.HashMap;
 
 import org.bimserver.plugins.renderengine.EntityNotFoundException;
@@ -113,5 +114,10 @@ public class IfcOpenShellModel implements RenderEngineModel {
 
 	@Override
 	public void setFilter(RenderEngineFilter renderEngineFilter) {
+	}
+
+	@Override
+	public Collection<RenderEngineInstance> listInstances() throws RenderEngineException {
+		return null;
 	}
 }
