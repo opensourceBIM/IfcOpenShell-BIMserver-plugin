@@ -55,11 +55,25 @@ public class IfcOpenShellEngine implements RenderEngine {
 	@Override
 	public void close() {
 		LOGGER.debug("Closing IfcOpenShell engine");
+		if (client.isRunning()) {
+			try {
+				client.close();
+			} catch (RenderEngineException e) {
+				LOGGER.error("", e);
+			}
+		}
 	}
 
 	@Override
 	public RenderEngineModel openModel(InputStream inputStream, long size) throws RenderEngineException {
-		return openModel(inputStream);
+		if (!client.isRunning()) {
+			client = new IfcGeomServerClient(filename);
+		}
+		try {
+			return new IfcOpenShellModel(client, filename, inputStream, size);
+		} catch (IOException e) {
+			throw new RenderEngineException(e);
+		}
 	}
 
 	@Override

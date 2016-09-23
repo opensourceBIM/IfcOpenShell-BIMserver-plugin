@@ -63,6 +63,16 @@ public class IfcGeomServerClient implements AutoCloseable {
 		}
 	}
 
+	public void loadModel(InputStream inputStream, long length) throws RenderEngineException {
+		IfcModel m = new IfcModel(inputStream, length);
+		try {
+			m.write(dos);
+			askForMore();
+		} catch (IOException e) {
+			close();
+		}
+	}
+
 	private static final int HELLO     = 0xff00;
 	private static final int IFC_MODEL = HELLO     + 1;
 	private static final int GET       = IFC_MODEL + 1;
@@ -163,6 +173,12 @@ public class IfcGeomServerClient implements AutoCloseable {
 			s.write(data);
 			while (len++ % 4 != 0) s.write(0);
 		}
+
+		protected void writeStringBinary(LittleEndianDataOutputStream s, InputStream inputStream, int length) throws IOException {
+			s.writeInt(length);
+			IOUtils.copy(inputStream, s);
+			while (length++ % 4 != 0) s.write(0);
+		}
 	}
 	
 	static class Hello extends Command {
@@ -211,10 +227,17 @@ public class IfcGeomServerClient implements AutoCloseable {
 	
 	static class IfcModel extends Command {
 		private InputStream ifcInputStream;
+		private long length = -1;
 		
 		IfcModel(InputStream ifcInputStream) {
 			super(IFC_MODEL);
 			this.ifcInputStream = ifcInputStream;
+		}
+
+		IfcModel(InputStream ifcInputStream, long length) {
+			super(IFC_MODEL);
+			this.ifcInputStream = ifcInputStream;
+			this.length = length;
 		}
 
 		@Override
@@ -224,10 +247,14 @@ public class IfcGeomServerClient implements AutoCloseable {
 
 		@Override
 		void write_contents(LittleEndianDataOutputStream s) throws IOException {
-			// This is now the point where memory problems will arise for large models
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			IOUtils.copy(ifcInputStream, baos);
-			writeStringBinary(s, baos.toByteArray());
+			if (length == -1) {
+				// This is now the point where memory problems will arise for large models
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				IOUtils.copy(ifcInputStream, baos);
+				writeStringBinary(s, baos.toByteArray());
+			} else {
+				writeStringBinary(s, ifcInputStream, (int) length);
+			}
 		}
 	}
 	

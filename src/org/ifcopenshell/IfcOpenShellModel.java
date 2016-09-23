@@ -61,6 +61,14 @@ public class IfcOpenShellModel implements RenderEngineModel {
 		client.loadModel(ifcInputStream);
 	}
 
+	public IfcOpenShellModel(IfcGeomServerClient client, String filename, InputStream ifcInputStream, long length) throws RenderEngineException, IOException {
+		this.client = client;
+		this.filename = filename;
+		this.ifcInputStream = ifcInputStream;
+		
+		client.loadModel(ifcInputStream, length);
+	}
+
 	@Override
 	public void close() throws RenderEngineException {
 		if (instancesById != null) {
