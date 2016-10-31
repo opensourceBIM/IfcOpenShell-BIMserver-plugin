@@ -399,27 +399,31 @@ public class IfcGeomServerClient implements AutoCloseable {
 				throw new IOException();
 			}			
 			b.read(dis);
-		} catch (IOException e) {}						
+		} catch (Throwable e) {}
 
-		// Give the executable some time to terminate by itself or kill
-		// it after 2 seconds have passed
-		for (int n = 0;;) {
-			try {
-				if (process.exitValue() != 0) {
+		try {
+			// Give the executable some time to terminate by itself or kill
+			// it after 2 seconds have passed
+			for (int n = 0;;) {
+				try {
+					if (process.exitValue() != 0) {
 //					LOGGER.error(String.format("Exited with non-zero exit code: %d", process.exitValue()));
-					throw new RenderEngineException(String.format("Exited with non-zero exit code: %d", process.exitValue()));
-				}
-				break;
-			} catch (IllegalThreadStateException e) {
-				if (n++ == 20) {
-					process.destroy();
-					LOGGER.error("Forcefully terminated IfcOpenShell process");
+						throw new RenderEngineException(String.format("Exited with non-zero exit code: %d", process.exitValue()));
+					}
 					break;
+				} catch (IllegalThreadStateException e) {
+					if (n++ == 20) {
+						process.destroy();
+						LOGGER.error("Forcefully terminated IfcOpenShell process");
+						break;
+					}
 				}
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {}
 			}
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {}
+		} finally {
+			process.destroyForcibly();
 		}
 		
 		dis = null;
