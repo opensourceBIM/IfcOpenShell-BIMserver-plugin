@@ -1,5 +1,6 @@
 package org.ifcopenshell;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -299,7 +300,11 @@ public class IfcGeomServerClient implements AutoCloseable {
 		}
 
 		@Override
-		void read_contents(LittleEndianDataInputStream s) throws IOException {
+		void read_contents(LittleEndianDataInputStream s0) throws IOException {
+			byte[] message = new byte[len];
+			s0.readFully(message, 0, len);
+			ByteArrayInputStream bis = new ByteArrayInputStream(message);
+			LittleEndianDataInputStream s = new LittleEndianDataInputStream(bis);
 			entity = new IfcGeomServerClientEntity(
 				s.readInt(),
 				readString(s),
@@ -312,10 +317,20 @@ public class IfcGeomServerClient implements AutoCloseable {
 				readFloatArray(s),
 				readIntArray(s),
 				readFloatArray(s),
-				readIntArray(s)
+				readIntArray(s),
+				readRemainder(bis)
 			);
 		}
 		
+		private String readRemainder(ByteArrayInputStream bis) {
+			if (bis.available() == 0) {
+				return null;
+			}
+			byte[] remainder = new byte[bis.available()];
+			bis.read(remainder, 0, remainder.length);
+			return new String(remainder);
+		}
+
 		public IfcGeomServerClientEntity getEntity() {
 			return entity;
 		}

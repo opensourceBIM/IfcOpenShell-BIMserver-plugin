@@ -1,6 +1,11 @@
 package org.ifcopenshell;
 
 import org.bimserver.geometry.Matrix;
+import org.bimserver.plugins.renderengine.RenderEngineException;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class IfcGeomServerClientEntity {
 	private int id;
@@ -15,11 +20,12 @@ public class IfcGeomServerClientEntity {
 	private int[] indices;
 	private float[] colors;
 	private int[] materialIndices;
+	private JsonObject extendedData;
 	
 	public IfcGeomServerClientEntity(int id, String guid, String name,
 			String type, int parentId, double[] matrix, int repId,
 			float[] positions, float[] normals, int[] indices, float[] colors,
-			int[] materialIndices) {
+			int[] materialIndices, String messageRemainder) {
 		super();
 		this.id = id;
 		this.guid = guid;
@@ -33,6 +39,12 @@ public class IfcGeomServerClientEntity {
 		this.indices = indices;
 		this.colors = colors;
 		this.materialIndices = materialIndices;
+		
+		this.extendedData = null;
+		if (messageRemainder != null && messageRemainder.length() > 0) {
+			// un-pad string
+			this.extendedData = new JsonParser().parse(messageRemainder.trim()).getAsJsonObject();
+		}
 	}
 	
 	public int getId() {
@@ -89,5 +101,16 @@ public class IfcGeomServerClientEntity {
 	
 	public int getNumberOfColors() {
 		return colors.length / 4;
+	}
+	
+	public float getExtendedDataAsFloat(String name) throws RenderEngineException {
+		if (this.extendedData == null) {
+			throw new RenderEngineException("No extended data for Entity " + this.guid);
+		}
+		JsonElement elem = extendedData.get(name);
+		if (elem == null) {
+			throw new RenderEngineException("No extended data entry found for " + name);
+		}
+		return elem.getAsFloat();
 	}
 }
