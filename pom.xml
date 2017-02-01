@@ -149,8 +149,9 @@
 	</profiles>
 	<distributionManagement>
 		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<id>archiva.snapshots</id>
+			<name>Internal Snapshot Repository</name>
+			<url>${snapshotsrepo}/</url>
 		</snapshotRepository>
 		<repository>
 			<id>ossrh</id>
