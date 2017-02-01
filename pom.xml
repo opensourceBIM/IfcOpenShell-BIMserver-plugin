@@ -5,6 +5,8 @@
 	<version>0.5.18-SNAPSHOT</version>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<timestamp>${maven.build.timestamp}</timestamp>
+		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ssZ</maven.build.timestamp.format>
 	</properties>
 	<description>BIMserver plugin that uses IfcOpenShell to generate geometry from IFC files</description>
 	<build>
