@@ -45,11 +45,11 @@ public class IfcOpenShellEntityInstance implements RenderEngineInstance {
 
 	@Override
 	public double getArea() throws RenderEngineException {
-		throw new UnsupportedOperationException();
+		return entity.getExtendedDataAsFloat("TOTAL_SURFACE_AREA");
 	}
 	
 	@Override
 	public double getVolume() throws RenderEngineException {
-		throw new UnsupportedOperationException();
+		return entity.getExtendedDataAsFloat("TOTAL_SHAPE_VOLUME");
 	}
 }

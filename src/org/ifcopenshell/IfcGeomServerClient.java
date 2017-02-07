@@ -1,5 +1,6 @@
 package org.ifcopenshell;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,8 +83,10 @@ public class IfcGeomServerClient implements AutoCloseable {
 	private static final int BYE       = NEXT      + 1;
 	private static final int GET_LOG   = BYE       + 1;
 	private static final int LOG       = GET_LOG   + 1;
+	private static final int DEFLECTION = LOG        + 1;
+	private static final int SETTING    = DEFLECTION + 1;
 	
-	private static String VERSION = "IfcOpenShell-0.5.0-dev";
+	private static String VERSION = "IfcOpenShell-0.5.0-dev-2";
 	
 	abstract static class Command {
 		abstract void read_contents(LittleEndianDataInputStream s) throws IOException;
@@ -306,7 +309,11 @@ public class IfcGeomServerClient implements AutoCloseable {
 		}
 
 		@Override
-		void read_contents(LittleEndianDataInputStream s) throws IOException {
+		void read_contents(LittleEndianDataInputStream s0) throws IOException {
+			byte[] message = new byte[len];
+			s0.readFully(message, 0, len);
+			ByteArrayInputStream bis = new ByteArrayInputStream(message);
+			LittleEndianDataInputStream s = new LittleEndianDataInputStream(bis);
 			entity = new IfcGeomServerClientEntity(
 				s.readInt(),
 				readString(s),
@@ -319,8 +326,18 @@ public class IfcGeomServerClient implements AutoCloseable {
 				readFloatArray(s),
 				readIntArray(s),
 				readFloatArray(s),
-				readIntArray(s)
+				readIntArray(s),
+				readRemainder(bis)
 			);
+		}
+		
+		private String readRemainder(ByteArrayInputStream bis) {
+			if (bis.available() == 0) {
+				return null;
+			}
+			byte[] remainder = new byte[bis.available()];
+			bis.read(remainder, 0, remainder.length);
+			return new String(remainder);
 		}
 		
 		public IfcGeomServerClientEntity getEntity() {
@@ -366,6 +383,57 @@ public class IfcGeomServerClient implements AutoCloseable {
 		
 		public String getString() {
 			return string;
+		}
+	}
+	
+	static class Deflection extends Command {
+		private double deflection;
+
+		Deflection(double deflection) {
+			super(DEFLECTION);
+			this.deflection = deflection;
+		}
+
+		@Override
+		void read_contents(LittleEndianDataInputStream s) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		void write_contents(LittleEndianDataOutputStream s) throws IOException {
+			s.writeDouble(deflection);
+		}
+	}
+
+	static class Setting extends Command {
+		private int id;
+		private int value;
+
+		public enum SettingId {
+			APPLY_LAYERSETS (1 << 17);
+
+			private final int id;
+			SettingId(int id) {
+				this.id = id;
+			}
+			private int getId() { return id; }
+		}
+
+		Setting(SettingId i, boolean b) {
+			super(SETTING);
+			this.id = i.getId();
+			this.value = b ? 1 : 0;
+		}
+
+		@Override
+		void read_contents(LittleEndianDataInputStream s) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		void write_contents(LittleEndianDataOutputStream s) throws IOException {
+			s.writeInt(id);
+			s.writeInt(value);
 		}
 	}
 	
