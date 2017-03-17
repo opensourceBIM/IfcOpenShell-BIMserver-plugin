@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
 public class IfcOpenShellModel implements RenderEngineModel {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IfcOpenShellModel.class);
 	
-	private String filename;
 	private InputStream ifcInputStream;
 
 	private HashMap<Integer,IfcOpenShellEntityInstance> instancesById;
@@ -55,7 +54,6 @@ public class IfcOpenShellModel implements RenderEngineModel {
 	
 	public IfcOpenShellModel(IfcGeomServerClient client, String filename, InputStream ifcInputStream) throws RenderEngineException, IOException {
 		this.client = client;
-		this.filename = filename;
 		this.ifcInputStream = ifcInputStream;
 		
 		client.loadModel(ifcInputStream);
@@ -63,7 +61,6 @@ public class IfcOpenShellModel implements RenderEngineModel {
 
 	public IfcOpenShellModel(IfcGeomServerClient client, String filename, InputStream ifcInputStream, long length) throws RenderEngineException, IOException {
 		this.client = client;
-		this.filename = filename;
 		this.ifcInputStream = ifcInputStream;
 		
 		client.loadModel(ifcInputStream, length);
