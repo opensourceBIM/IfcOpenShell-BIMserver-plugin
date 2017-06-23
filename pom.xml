@@ -164,7 +164,7 @@
 		<dependency>
 			<groupId>org.opensourcebim</groupId>
 			<artifactId>pluginbase</artifactId>
-			<version>1.5.73</version>
+			<version>1.5.79-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<scm>
