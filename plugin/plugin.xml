@@ -4,6 +4,6 @@
 		<interfaceClass>org.bimserver.plugins.renderengine.RenderEnginePlugin</interfaceClass>
 		<implementationClass>org.ifcopenshell.IfcOpenShellEnginePlugin</implementationClass>
 		<description>Open source IFC geometry engine visit &lt;a href=&apos;http://ifcopenshell.org&apos;&gt;ifcopenshell.org&lt;/a&gt;</description>
-		
+		<name>IfcOpenShell</name>
 	</JavaPlugin>
 </PluginDescriptor>
