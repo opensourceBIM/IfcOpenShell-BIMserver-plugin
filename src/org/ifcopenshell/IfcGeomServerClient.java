@@ -54,16 +54,16 @@ public class IfcGeomServerClient implements AutoCloseable {
 			dis = new LittleEndianDataInputStream(process.getInputStream());
 			
 			if (dis.readInt() != HELLO) {
-				terminate();
 				LOGGER.error("Invalid welcome message received");
+				terminate();
 				return;
 			}
 			Hello h = new Hello(); h.read(dis);
 			
 			String reportedVersion = h.getString();
 			if (!VERSION.equals(reportedVersion)) {
-				terminate();
 				LOGGER.error(String.format("Version mismatch: Plugin version %s does not match IfcOpenShell version %s", VERSION, reportedVersion));
+				terminate();
 				return;
 			}
 		} catch (IOException e) {
@@ -559,5 +559,9 @@ public class IfcGeomServerClient implements AutoCloseable {
 
 	public boolean hasNext() {
 		return hasMore;
+	}
+	
+	public String getVersion() {
+		return VERSION;
 	}
 }

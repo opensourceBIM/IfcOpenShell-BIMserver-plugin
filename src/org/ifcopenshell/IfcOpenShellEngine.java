@@ -57,6 +57,7 @@ public class IfcOpenShellEngine implements RenderEngine {
 	public static final Boolean debug = false;
 	private String filename;
 	private IfcGeomServerClient client;
+	private String version;
 
 	public IfcOpenShellEngine(String fn) throws IOException {
 		filename = fn;
@@ -67,17 +68,18 @@ public class IfcOpenShellEngine implements RenderEngine {
 		LOGGER.debug("Initializing IfcOpenShell engine");
 		
 		client = new IfcGeomServerClient(filename);
+		version = client.getVersion();
+	}
+	
+	public String getVersion() {
+		return version;
 	}
 	
 	@Override
-	public void close() {
+	public void close() throws RenderEngineException {
 		LOGGER.debug("Closing IfcOpenShell engine");
 		if (client.isRunning()) {
-			try {
-				client.close();
-			} catch (RenderEngineException e) {
-				LOGGER.error("", e);
-			}
+			client.close();
 		}
 	}
 
