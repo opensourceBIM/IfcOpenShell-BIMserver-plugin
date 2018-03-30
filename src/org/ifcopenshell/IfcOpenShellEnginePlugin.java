@@ -127,16 +127,20 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 					initialized = new File(filename).canExecute();
 					if (initialized) {
 						LOGGER.info("Using " + exePath);
-					}					
+					} else {
+						throw new PluginException("File " + filename + " is not executable");
+					}
 				} finally {
 					inputStream.close();
 				}
+			} else {
+				throw new PluginException(exePath.toString() + " was not found");
 			}
 		} catch (Exception e) {
 			throw new PluginException(e);
 		}
 		if (!initialized) {
-			throw new PluginException(String.format("No executable found for the %s platorm", os));
+			throw new PluginException(String.format("IfcOpenShell plugin did not initialize successfully", os));
 		}
 	}
 
