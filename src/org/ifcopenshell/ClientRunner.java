@@ -4,7 +4,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 import org.bimserver.plugins.renderengine.RenderEngineException;
-import org.bimserver.shared.exceptions.PluginException;
 
 public class ClientRunner {
 	
@@ -13,7 +12,7 @@ public class ClientRunner {
 		IfcGeomServerClient client;
 		
 		try {
-			client = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.REPOSITORY);
+			client = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3);
 		} catch (RenderEngineException e) {
 			e.printStackTrace();
 			return;

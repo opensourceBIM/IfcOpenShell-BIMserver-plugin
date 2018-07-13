@@ -19,12 +19,22 @@ package org.ifcopenshell;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.Collections;
+import java.util.zip.ZipInputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bimserver.plugins.renderengine.RenderEngineException;
 import org.bimserver.shared.exceptions.PluginException;
@@ -34,6 +44,10 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Charsets;
 import com.google.common.io.LittleEndianDataInputStream;
 import com.google.common.io.LittleEndianDataOutputStream;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 
 public class IfcGeomServerClient implements AutoCloseable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IfcGeomServerClient.class);
@@ -109,7 +123,68 @@ public class IfcGeomServerClient implements AutoCloseable {
 			} catch (PluginException e) {
 				throw new RenderEngineException(e);
 			}
-		}				
+		} else if (source == ExecutableSource.S3) {
+			boolean initialized = false;
+			try {
+				URL buildsUrl = new URL("https://s3.amazonaws.com/ifcopenshell-builds/v0.6.0.json");
+				JsonArray builds = new Gson().fromJson(new InputStreamReader(buildsUrl.openStream()), JsonArray.class);
+				
+				String os = getOs();
+				String platform;
+				
+				if (os == "osx") {
+					platform = "macOS 64";
+				} else {
+					platform = Character.toUpperCase(os.charAt(0)) + os.substring(1) + " " + System.getProperty("sun.arch.data.model");
+				}
+				
+				for (int i = 0; i < builds.size(); i++) {
+					String platformValue = builds.get(i).getAsJsonObject().get("platform").getAsString();
+					String productValue = builds.get(i).getAsJsonObject().get("product").getAsString();
+					String urlValue = builds.get(i).getAsJsonObject().get("url").getAsString();
+					
+					if ("IfcGeomServer".equals(productValue) && platform.equals(platformValue)) {
+						System.out.println(String.format("Downloading from %s", urlValue));
+						
+						final String executableName = "IfcGeomServer" + getExecutableExtension();
+						File tempZip = File.createTempFile(executableName, ".zip"); 
+						File tempExe = File.createTempFile(executableName, getExecutableExtension()); 
+						FileUtils.copyInputStreamToFile(new URL(urlValue).openStream(), tempZip);
+						
+						ZipInputStream zis = new ZipInputStream(new FileInputStream(tempZip));
+						// tfk: assume single entry
+						zis.getNextEntry();
+						
+						System.out.println(String.format("Unzipping to %s", tempExe.toString()));
+						
+						int len;
+						byte[] buffer = new byte[1024];
+						FileOutputStream fos = new FileOutputStream(tempExe);
+						
+						while ((len = zis.read(buffer)) > 0) {
+			                fos.write(buffer, 0, len);
+		                }
+						
+						fos.close();
+						
+						zis.closeEntry();
+						zis.close();
+						
+						try {
+							Files.setPosixFilePermissions(tempExe.toPath(), Collections.singleton(PosixFilePermission.OWNER_EXECUTE));
+						} catch (Exception e) {}
+						
+						initialize(tempExe.toString());
+						initialized = true;
+					}
+				}
+			} catch (JsonSyntaxException | JsonIOException | IOException | PluginException e) {
+				throw new RenderEngineException(e);
+			}
+			if (!initialized) {
+				throw new RenderEngineException("No ");
+			}
+		}
 	}
 	
 	public IfcGeomServerClient(String executableFilename) throws RenderEngineException {
@@ -172,7 +247,7 @@ public class IfcGeomServerClient implements AutoCloseable {
 	private static final int DEFLECTION = LOG        + 1;
 	private static final int SETTING    = DEFLECTION + 1;
 	
-	private static String VERSION = "IfcOpenShell-0.5.0-dev-2";
+	private static String VERSION = "IfcOpenShell-0.6.0a1-0";
 	
 	abstract static class Command {
 		abstract void read_contents(LittleEndianDataInputStream s) throws IOException;
@@ -225,16 +300,6 @@ public class IfcGeomServerClient implements AutoCloseable {
 			double[] fs = new double[len];
 			for (int i = 0; i < len; ++i) {
 				fs[i] = s.readDouble();
-			}
-			return fs;
-		}
-
-		protected double[] readDoubleWhichShouldBeFloatArray(LittleEndianDataInputStream s) throws IOException {
-			int len = s.readInt() / 4;
-			double[] fs = new double[len];
-			for (int i = 0; i < len; ++i) {
-				// TODO ask IOS to return doubles
-				fs[i] = s.readFloat();
 			}
 			return fs;
 		}
@@ -406,7 +471,7 @@ public class IfcGeomServerClient implements AutoCloseable {
 				readString(s),
 				readString(s),
 				s.readInt(),
-				readDoubleWhichShouldBeFloatArray(s),
+				readDoubleArray(s),
 				s.readInt(),
 				readFloatArray(s),
 				readFloatArray(s),

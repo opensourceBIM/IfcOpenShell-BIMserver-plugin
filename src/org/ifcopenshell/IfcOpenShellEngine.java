@@ -45,12 +45,9 @@ package org.ifcopenshell;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
-
 import org.bimserver.plugins.renderengine.RenderEngine;
 import org.bimserver.plugins.renderengine.RenderEngineException;
 import org.bimserver.plugins.renderengine.RenderEngineModel;
-import org.bimserver.shared.exceptions.PluginException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
