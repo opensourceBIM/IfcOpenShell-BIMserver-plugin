@@ -45,29 +45,31 @@ package org.ifcopenshell;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 
 import org.bimserver.plugins.renderengine.RenderEngine;
 import org.bimserver.plugins.renderengine.RenderEngineException;
 import org.bimserver.plugins.renderengine.RenderEngineModel;
+import org.bimserver.shared.exceptions.PluginException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IfcOpenShellEngine implements RenderEngine {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IfcOpenShellEngine.class);
 	public static final Boolean debug = false;
-	private String filename;
+	private String executableFilename;
 	private IfcGeomServerClient client;
 	private String version;
-
-	public IfcOpenShellEngine(String fn) throws IOException {
-		filename = fn;
+	
+	public IfcOpenShellEngine(String executableFilename) throws IOException {
+		this.executableFilename = executableFilename;
 	}
 
 	@Override
 	public void init() throws RenderEngineException {
 		LOGGER.debug("Initializing IfcOpenShell engine");
 		
-		client = new IfcGeomServerClient(filename);
+		client = new IfcGeomServerClient(executableFilename);
 		version = client.getVersion();
 	}
 	
@@ -86,10 +88,10 @@ public class IfcOpenShellEngine implements RenderEngine {
 	@Override
 	public RenderEngineModel openModel(InputStream inputStream, long size) throws RenderEngineException {
 		if (!client.isRunning()) {
-			client = new IfcGeomServerClient(filename);
+			client = new IfcGeomServerClient(executableFilename);
 		}
 		try {
-			return new IfcOpenShellModel(client, filename, inputStream, size);
+			return new IfcOpenShellModel(client, executableFilename, inputStream, size);
 		} catch (IOException e) {
 			throw new RenderEngineException(e);
 		}
@@ -98,10 +100,10 @@ public class IfcOpenShellEngine implements RenderEngine {
 	@Override
 	public RenderEngineModel openModel(InputStream inputStream) throws RenderEngineException {
 		if (!client.isRunning()) {
-			client = new IfcGeomServerClient(filename);
+			client = new IfcGeomServerClient(executableFilename);
 		}
 		try {
-			return new IfcOpenShellModel(client, filename, inputStream);
+			return new IfcOpenShellModel(client, executableFilename, inputStream);
 		} catch (IOException e) {
 			throw new RenderEngineException(e);
 		}

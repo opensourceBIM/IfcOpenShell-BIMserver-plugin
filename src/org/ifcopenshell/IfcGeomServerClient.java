@@ -21,9 +21,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.apache.commons.io.IOUtils;
 import org.bimserver.plugins.renderengine.RenderEngineException;
+import org.bimserver.shared.exceptions.PluginException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +51,72 @@ public class IfcGeomServerClient implements AutoCloseable {
 		terminate();
 	}
 	
+
+	private static String getOs() throws PluginException {
+		final String os = System.getProperty("os.name").toLowerCase();
+		if (os.contains("windows")) {
+			return "win";
+		} else if (os.contains("osx") || os.contains("os x") || os.contains("darwin") || os.contains("mac")) {
+			return "osx";
+		} else if (os.contains("linux")) {
+			return "linux";
+		} else {
+			throw new PluginException(String.format("IfcOpenShell is not available on the %s platorm", os));
+		}
+	}
+	
+	private static String getExecutableExtension() {
+		final String os = System.getProperty("os.name").toLowerCase();
+		if (os.contains("windows")) {
+			return ".exe";
+		} else {
+			return "";
+		}
+	}
+	
+	public static Path getExecutablePathFromRepo(Path root) throws PluginException {
+		final String executableName = "IfcGeomServer" + getExecutableExtension();
+		final String operatingSystem = getOs();
+		final String bitness = operatingSystem.equals("osx") ? "64" : System.getProperty("sun.arch.data.model");
+
+		return root.resolve("exe")
+				.resolve(bitness)
+				.resolve(operatingSystem)
+				.resolve(executableName);
+	}
+	
+	private Path getSourcePath() throws RenderEngineException {
+		String name = getClass().getName();
+		int lastDot = name.lastIndexOf(".");
+		name = name.substring(lastDot + 1) + ".class";
+		try {
+			return Paths.get(this.getClass().getResource(name).toURI())
+					.getParent().getParent().getParent().getParent().getParent();
+		} catch (URISyntaxException e) {
+			throw new RenderEngineException(e);
+		}
+	}
+	
+	public enum ExecutableSource {
+		REPOSITORY,
+		S3
+	}
+	
+	public IfcGeomServerClient(ExecutableSource source) throws RenderEngineException {
+		if (source == ExecutableSource.REPOSITORY) {
+			try {
+				initialize(getExecutablePathFromRepo(getSourcePath()).toString());
+			} catch (PluginException e) {
+				throw new RenderEngineException(e);
+			}
+		}				
+	}
+	
 	public IfcGeomServerClient(String executableFilename) throws RenderEngineException {
+		initialize(executableFilename);
+	}
+	
+	private void initialize(String executableFilename) throws RenderEngineException {
 		try {
 			process = Runtime.getRuntime().exec(executableFilename);
 			dos = new LittleEndianDataOutputStream(process.getOutputStream());

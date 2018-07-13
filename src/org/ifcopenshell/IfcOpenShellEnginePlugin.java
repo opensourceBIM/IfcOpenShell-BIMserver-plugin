@@ -81,25 +81,9 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 
 	@Override
 	public void init(PluginContext pluginContext) throws PluginException {
-		final String os = System.getProperty("os.name").toLowerCase();
-		final String executableName;
-		final String operatingSystem;
-		if (os.contains("windows")) {
-			operatingSystem = "win";
-			executableName = "IfcGeomServer.exe";
-		} else if (os.contains("osx") || os.contains("os x") || os.contains("darwin")) {
-			operatingSystem = "osx";
-			executableName = "IfcGeomServer";
-		} else if (os.contains("linux")) {
-			operatingSystem = "linux";
-			executableName = "IfcGeomServer";
-		} else {
-			throw new PluginException(String.format("IfcOpenShell is not available on the %s platorm", os));
-		}
 		try {
-			final String bitness = operatingSystem.equals("osx") ? "64" : System.getProperty("sun.arch.data.model");
-			final String exePath = String.format("exe/%s/%s/%s", bitness, operatingSystem, executableName);
-			final InputStream inputStream = Files.newInputStream(pluginContext.getRootPath().resolve(exePath));
+			Path exePath = IfcGeomServerClient.getExecutablePathFromRepo(pluginContext.getRootPath());
+			final InputStream inputStream = Files.newInputStream(exePath);
 			if (inputStream != null) {
 				try {
 					Path nativeFolder = pluginContext.getTempDir();
@@ -111,7 +95,7 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 						}
 					}
 					Files.createDirectories(nativeFolder);
-					Path file = nativeFolder.resolve(executableName);
+					Path file = nativeFolder.resolve(exePath.getFileName());
 					OutputStream outputStream = Files.newOutputStream(file);
 					try {
 						IOUtils.copy(inputStream, outputStream);
@@ -140,7 +124,7 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 			throw new PluginException(e);
 		}
 		if (!initialized) {
-			throw new PluginException(String.format("IfcOpenShell plugin did not initialize successfully", os));
+			throw new PluginException("IfcOpenShell plugin did not initialize successfully");
 		}
 	}
 
