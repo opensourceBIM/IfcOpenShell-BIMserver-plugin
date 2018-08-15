@@ -125,12 +125,13 @@ public class IfcGeomServerClient implements AutoCloseable {
 			}
 		} else if (source == ExecutableSource.S3) {
 			boolean initialized = false;
+			String platform = "unknown";
+			
 			try {
 				URL buildsUrl = new URL("https://s3.amazonaws.com/ifcopenshell-builds/v0.6.0.json");
 				JsonArray builds = new Gson().fromJson(new InputStreamReader(buildsUrl.openStream()), JsonArray.class);
 				
 				String os = getOs();
-				String platform;
 				
 				if (os == "osx") {
 					platform = "macOS 64";
@@ -143,46 +144,58 @@ public class IfcGeomServerClient implements AutoCloseable {
 					String productValue = builds.get(i).getAsJsonObject().get("product").getAsString();
 					String urlValue = builds.get(i).getAsJsonObject().get("url").getAsString();
 					
+					final Path homeDir = Paths.get(System.getProperty("user.home"));
+															
 					if ("IfcGeomServer".equals(productValue) && platform.equals(platformValue)) {
-						System.out.println(String.format("Downloading from %s", urlValue));
+						String baseName = new File(new URL(urlValue).getPath()).getName();
+						baseName = baseName.substring(0, baseName.length() - 4);
+						baseName += getExecutableExtension();
+						File exePath = homeDir.resolve(".ifcopenshell").resolve(baseName).toFile();
 						
-						final String executableName = "IfcGeomServer" + getExecutableExtension();
-						File tempZip = File.createTempFile(executableName, ".zip"); 
-						File tempExe = File.createTempFile(executableName, getExecutableExtension()); 
-						FileUtils.copyInputStreamToFile(new URL(urlValue).openStream(), tempZip);
+						if (!exePath.exists()) {			
+							System.out.println(String.format("Downloading from %s", urlValue));
+							
+							File tempZip = File.createTempFile(baseName, ".zip"); 
+							
+							FileUtils.copyInputStreamToFile(new URL(urlValue).openStream(), tempZip);
+							
+							ZipInputStream zis = new ZipInputStream(new FileInputStream(tempZip));
+							// tfk: assume single entry
+							zis.getNextEntry();
+							
+							exePath.getParentFile().mkdirs();
+							System.out.println(String.format("Unzipping to %s", exePath.toString()));
+							
+							int len;
+							byte[] buffer = new byte[1024];
+							FileOutputStream fos = new FileOutputStream(exePath);
+							
+							while ((len = zis.read(buffer)) > 0) {
+				                fos.write(buffer, 0, len);
+			                }
+							
+							fos.close();
+							
+							zis.closeEntry();
+							zis.close();
+							
+							tempZip.delete();
+							
+							try {
+								Files.setPosixFilePermissions(exePath.toPath(), Collections.singleton(PosixFilePermission.OWNER_EXECUTE));
+							} catch (Exception e) {}
+						}
 						
-						ZipInputStream zis = new ZipInputStream(new FileInputStream(tempZip));
-						// tfk: assume single entry
-						zis.getNextEntry();
-						
-						System.out.println(String.format("Unzipping to %s", tempExe.toString()));
-						
-						int len;
-						byte[] buffer = new byte[1024];
-						FileOutputStream fos = new FileOutputStream(tempExe);
-						
-						while ((len = zis.read(buffer)) > 0) {
-			                fos.write(buffer, 0, len);
-		                }
-						
-						fos.close();
-						
-						zis.closeEntry();
-						zis.close();
-						
-						try {
-							Files.setPosixFilePermissions(tempExe.toPath(), Collections.singleton(PosixFilePermission.OWNER_EXECUTE));
-						} catch (Exception e) {}
-						
-						initialize(tempExe.toString());
+						initialize(exePath.toString());
 						initialized = true;
+						break;
 					}
 				}
 			} catch (JsonSyntaxException | JsonIOException | IOException | PluginException e) {
 				throw new RenderEngineException(e);
 			}
 			if (!initialized) {
-				throw new RenderEngineException("No ");
+				throw new RenderEngineException("No IfcGeomServer executable found for platform '" + platform + "'");
 			}
 		}
 	}
@@ -206,9 +219,8 @@ public class IfcGeomServerClient implements AutoCloseable {
 			
 			String reportedVersion = h.getString();
 			if (!VERSION.equals(reportedVersion)) {
-				LOGGER.error(String.format("Version mismatch: Plugin version %s does not match IfcOpenShell version %s", VERSION, reportedVersion));
 				terminate();
-				return;
+				throw new RenderEngineException(String.format("Version mismatch: Plugin version %s does not match IfcOpenShell version %s", VERSION, reportedVersion));
 			}
 		} catch (IOException e) {
 			throw new RenderEngineException(e);
@@ -296,7 +308,7 @@ public class IfcGeomServerClient implements AutoCloseable {
 		}
 		
 		protected double[] readDoubleArray(LittleEndianDataInputStream s) throws IOException {
-			int len = s.readInt() / 4;
+			int len = s.readInt() / 8;
 			double[] fs = new double[len];
 			for (int i = 0; i < len; ++i) {
 				fs[i] = s.readDouble();
