@@ -56,10 +56,12 @@ import org.slf4j.LoggerFactory;
 
 public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IfcOpenShellEnginePlugin.class);
+	private String executableFilename;
+	
 	@Override
 	public RenderEngine createRenderEngine(PluginConfiguration pluginConfiguration, String schema) throws RenderEngineException {
 		try {
-			return new IfcOpenShellEngine();
+			return new IfcOpenShellEngine(executableFilename);
 		} catch (IOException e) {
 			throw new RenderEngineException(e);
 		}
@@ -70,7 +72,8 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		// Make sure an executable is downloaded before invoking the plug-in using multiple threads.
 		// This also checks whether the version of the executable matches the java source.
 		IfcGeomServerClient test = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3);
-		LOGGER.info("Using " + test.getExecutableFilename());
+		executableFilename = test.getExecutableFilename();
+		LOGGER.info("Using " + executableFilename);
 		test.close();
 	}
 

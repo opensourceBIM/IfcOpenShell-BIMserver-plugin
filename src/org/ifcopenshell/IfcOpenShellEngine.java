@@ -53,18 +53,21 @@ import org.slf4j.LoggerFactory;
 
 public class IfcOpenShellEngine implements RenderEngine {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IfcOpenShellEngine.class);
+	private String executableFilename;
 	public static final Boolean debug = false;
 
 	private IfcGeomServerClient client;
 	private String version;
 	
-	public IfcOpenShellEngine() throws IOException {}
+	public IfcOpenShellEngine(String executableFilename) throws IOException {
+		this.executableFilename = executableFilename;
+	}
 
 	@Override
 	public void init() throws RenderEngineException {
 		LOGGER.debug("Initializing IfcOpenShell engine");
 		
-		client = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3);
+		client = new IfcGeomServerClient(executableFilename);
 		version = client.getVersion();
 	}
 	
@@ -83,7 +86,7 @@ public class IfcOpenShellEngine implements RenderEngine {
 	@Override
 	public RenderEngineModel openModel(InputStream inputStream, long size) throws RenderEngineException {
 		if (!client.isRunning()) {
-			client = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3);
+			client = new IfcGeomServerClient(executableFilename);
 		}
 		try {
 			return new IfcOpenShellModel(client, inputStream, size);
@@ -95,7 +98,7 @@ public class IfcOpenShellEngine implements RenderEngine {
 	@Override
 	public RenderEngineModel openModel(InputStream inputStream) throws RenderEngineException {
 		if (!client.isRunning()) {
-			client = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3);
+			client = new IfcGeomServerClient(executableFilename);
 		}
 		try {
 			return new IfcOpenShellModel(client, inputStream);
