@@ -66,7 +66,7 @@ public class IfcOpenShellEngine implements RenderEngine {
 	public void init() throws RenderEngineException {
 		LOGGER.debug("Initializing IfcOpenShell engine");
 		
-		client = new IfcGeomServerClient(executableFilename);
+		client = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3);
 		version = client.getVersion();
 	}
 	
@@ -85,7 +85,7 @@ public class IfcOpenShellEngine implements RenderEngine {
 	@Override
 	public RenderEngineModel openModel(InputStream inputStream, long size) throws RenderEngineException {
 		if (!client.isRunning()) {
-			client = new IfcGeomServerClient(executableFilename);
+			client = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3);
 		}
 		try {
 			return new IfcOpenShellModel(client, executableFilename, inputStream, size);
@@ -97,7 +97,7 @@ public class IfcOpenShellEngine implements RenderEngine {
 	@Override
 	public RenderEngineModel openModel(InputStream inputStream) throws RenderEngineException {
 		if (!client.isRunning()) {
-			client = new IfcGeomServerClient(executableFilename);
+			client = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3);
 		}
 		try {
 			return new IfcOpenShellModel(client, executableFilename, inputStream);
