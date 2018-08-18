@@ -54,13 +54,11 @@ import org.slf4j.LoggerFactory;
 public class IfcOpenShellEngine implements RenderEngine {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IfcOpenShellEngine.class);
 	public static final Boolean debug = false;
-	private String executableFilename;
+
 	private IfcGeomServerClient client;
 	private String version;
 	
-	public IfcOpenShellEngine(String executableFilename) throws IOException {
-		this.executableFilename = executableFilename;
-	}
+	public IfcOpenShellEngine() throws IOException {}
 
 	@Override
 	public void init() throws RenderEngineException {
@@ -88,7 +86,7 @@ public class IfcOpenShellEngine implements RenderEngine {
 			client = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3);
 		}
 		try {
-			return new IfcOpenShellModel(client, executableFilename, inputStream, size);
+			return new IfcOpenShellModel(client, inputStream, size);
 		} catch (IOException e) {
 			throw new RenderEngineException(e);
 		}
@@ -100,7 +98,7 @@ public class IfcOpenShellEngine implements RenderEngine {
 			client = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3);
 		}
 		try {
-			return new IfcOpenShellModel(client, executableFilename, inputStream);
+			return new IfcOpenShellModel(client, inputStream);
 		} catch (IOException e) {
 			throw new RenderEngineException(e);
 		}

@@ -43,16 +43,7 @@ package org.ifcopenshell;
  * along with this program.  If not, see {@literal<http://www.gnu.org/licenses/>}.
  *****************************************************************************/
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermission;
-import java.util.Collections;
-
-import org.apache.commons.io.IOUtils;
 import org.bimserver.models.store.ObjectDefinition;
 import org.bimserver.plugins.PluginConfiguration;
 import org.bimserver.plugins.PluginContext;
@@ -60,20 +51,15 @@ import org.bimserver.plugins.renderengine.RenderEngine;
 import org.bimserver.plugins.renderengine.RenderEngineException;
 import org.bimserver.plugins.renderengine.RenderEnginePlugin;
 import org.bimserver.shared.exceptions.PluginException;
-import org.bimserver.utils.PathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IfcOpenShellEnginePlugin.class);
-	
-	private boolean initialized = false;
-	private String filename;
-
 	@Override
 	public RenderEngine createRenderEngine(PluginConfiguration pluginConfiguration, String schema) throws RenderEngineException {
 		try {
-			return new IfcOpenShellEngine(filename);
+			return new IfcOpenShellEngine();
 		} catch (IOException e) {
 			throw new RenderEngineException(e);
 		}
@@ -81,51 +67,11 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 
 	@Override
 	public void init(PluginContext pluginContext) throws PluginException {
-		try {
-			Path exePath = IfcGeomServerClient.getExecutablePathFromRepo(pluginContext.getRootPath());
-			final InputStream inputStream = Files.newInputStream(exePath);
-			if (inputStream != null) {
-				try {
-					Path nativeFolder = pluginContext.getTempDir();
-					if (Files.exists(nativeFolder)) {
-						try {
-							PathUtils.removeDirectoryWithContent(nativeFolder);
-						} catch (IOException e) {
-							// Ignore
-						}
-					}
-					Files.createDirectories(nativeFolder);
-					Path file = nativeFolder.resolve(exePath.getFileName());
-					OutputStream outputStream = Files.newOutputStream(file);
-					try {
-						IOUtils.copy(inputStream, outputStream);
-					} finally {
-						outputStream.close();
-					}
-					try {
-						Files.setPosixFilePermissions(file, Collections.singleton(PosixFilePermission.OWNER_EXECUTE));
-					} catch (Exception e) {
-						// Ignore.. permission bit tested below
-					}
-					this.filename = file.toString();
-					initialized = new File(filename).canExecute();
-					if (initialized) {
-						LOGGER.info("Using " + exePath);
-					} else {
-						throw new PluginException("File " + filename + " is not executable");
-					}
-				} finally {
-					inputStream.close();
-				}
-			} else {
-				throw new PluginException(exePath.toString() + " was not found");
-			}
-		} catch (Exception e) {
-			throw new PluginException(e);
-		}
-		if (!initialized) {
-			throw new PluginException("IfcOpenShell plugin did not initialize successfully");
-		}
+		// Make sure an executable is downloaded before invoking the plug-in using multiple threads.
+		// This also checks whether the version of the executable matches the java source.
+		IfcGeomServerClient test = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3);
+		LOGGER.info("Using " + test.getExecutableFilename());
+		test.close();
 	}
 
 	@Override

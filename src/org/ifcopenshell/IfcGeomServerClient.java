@@ -58,7 +58,13 @@ public class IfcGeomServerClient implements AutoCloseable {
 	private boolean hasMore = false;
 
 	private volatile boolean running = true;
+
+	private String executableFilename;
 	
+	public String getExecutableFilename() {
+		return executableFilename;
+	}
+
 	@Override
 	public void close() throws RenderEngineException {
 		running = false;
@@ -206,6 +212,8 @@ public class IfcGeomServerClient implements AutoCloseable {
 	
 	private void initialize(String executableFilename) throws RenderEngineException {
 		try {
+			this.executableFilename = executableFilename;
+			
 			process = Runtime.getRuntime().exec(executableFilename);
 			dos = new LittleEndianDataOutputStream(process.getOutputStream());
 			dis = new LittleEndianDataInputStream(process.getInputStream());
