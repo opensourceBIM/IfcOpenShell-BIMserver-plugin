@@ -159,7 +159,7 @@ public class IfcGeomServerClient implements AutoCloseable {
 						File exePath = homeDir.resolve(".ifcopenshell").resolve(baseName).toFile();
 						
 						if (!exePath.exists()) {			
-							System.out.println(String.format("Downloading from %s", urlValue));
+							LOGGER.info(String.format("Downloading from %s", urlValue));
 							
 							File tempZip = File.createTempFile(baseName, ".zip"); 
 							
@@ -170,7 +170,7 @@ public class IfcGeomServerClient implements AutoCloseable {
 							zis.getNextEntry();
 							
 							exePath.getParentFile().mkdirs();
-							System.out.println(String.format("Unzipping to %s", exePath.toString()));
+							LOGGER.info(String.format("Unzipping to %s", exePath.toString()));
 							
 							int len;
 							byte[] buffer = new byte[1024];
