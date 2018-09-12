@@ -18,10 +18,6 @@
 				<filtering>true</filtering>
 			</resource>
 			<resource>
-				<targetPath>exe</targetPath>
-				<directory>exe</directory>
-			</resource>
-			<resource>
 				<targetPath>img</targetPath>
 				<directory>img</directory>
 			</resource>
