@@ -162,7 +162,7 @@ public class IfcGeomServerClient implements AutoCloseable {
 						String baseName = new File(new URL(urlValue).getPath()).getName();
 						baseName = baseName.substring(0, baseName.length() - 4);
 						baseName += getExecutableExtension();
-						File exePath = homeDir.resolve(".ifcopenshell").resolve(baseName).toFile();
+						File exePath = homeDir.resolve(baseName).toFile();
 						
 						if (!exePath.exists()) {			
 							LOGGER.info(String.format("Downloading from %s", urlValue));
