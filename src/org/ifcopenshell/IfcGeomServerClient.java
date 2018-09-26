@@ -123,6 +123,14 @@ public class IfcGeomServerClient implements AutoCloseable {
 	}
 	
 	public IfcGeomServerClient(ExecutableSource source) throws RenderEngineException {
+		getExecutable(source, Paths.get(System.getProperty("user.home")));
+	}
+	
+	public IfcGeomServerClient(ExecutableSource source, Path homeDir) throws RenderEngineException {
+		getExecutable(source, homeDir);
+	}
+	
+	private void getExecutable(ExecutableSource source, Path homeDir) throws RenderEngineException {
 		if (source == ExecutableSource.REPOSITORY) {
 			try {
 				initialize(getExecutablePathFromRepo(getSourcePath()).toString());
@@ -150,8 +158,6 @@ public class IfcGeomServerClient implements AutoCloseable {
 					String productValue = builds.get(i).getAsJsonObject().get("product").getAsString();
 					String urlValue = builds.get(i).getAsJsonObject().get("url").getAsString();
 					
-					final Path homeDir = Paths.get(System.getProperty("user.home"));
-															
 					if ("IfcGeomServer".equals(productValue) && platform.equals(platformValue)) {
 						String baseName = new File(new URL(urlValue).getPath()).getName();
 						baseName = baseName.substring(0, baseName.length() - 4);

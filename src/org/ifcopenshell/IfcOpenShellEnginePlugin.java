@@ -71,7 +71,7 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	public void init(PluginContext pluginContext) throws PluginException {
 		// Make sure an executable is downloaded before invoking the plug-in using multiple threads.
 		// This also checks whether the version of the executable matches the java source.
-		IfcGeomServerClient test = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3);
+		IfcGeomServerClient test = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3, pluginContext.getTempDir());
 		executableFilename = test.getExecutableFilename();
 		LOGGER.info("Using " + executableFilename);
 		test.close();
