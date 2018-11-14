@@ -289,6 +289,10 @@ public class IfcGeomServerClient implements AutoCloseable {
 	}
 
 	public void loadModel(InputStream inputStream, long length) throws RenderEngineException {
+		if (process == null) {
+			initialize();
+		}
+
 		IfcModel m = new IfcModel(inputStream, length);
 		try {
 			m.write(dos);
