@@ -63,14 +63,14 @@ public class IfcOpenShellEntityInstance implements RenderEngineInstance {
 	@Override
 	public double getArea() throws RenderEngineException {
 		if (entity.getType().equalsIgnoreCase("IfcSpace")) {
-			return entity.getExtendedDataAsFloat("WALKABLE_SURFACE_AREA");
+			return entity.getAllExtendedData().get("WALKABLE_SURFACE_AREA");
 		} else {
-			return entity.getExtendedDataAsFloat("TOTAL_SURFACE_AREA");
+			return entity.getAllExtendedData().get("TOTAL_SURFACE_AREA");
 		}
 	}
 	
 	@Override
 	public double getVolume() throws RenderEngineException {
-		return entity.getExtendedDataAsFloat("TOTAL_SHAPE_VOLUME");
+		return entity.getAllExtendedData().get("TOTAL_SHAPE_VOLUME");
 	}
 }
