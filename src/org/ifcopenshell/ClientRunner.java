@@ -2,6 +2,7 @@ package org.ifcopenshell;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.Map;
 
 import org.bimserver.plugins.renderengine.RenderEngineException;
 
@@ -19,6 +20,12 @@ public class ClientRunner {
 		}
 		
 		try {
+			client.setCalculateQuantities(true);
+		} catch (RenderEngineException e1) {
+			e1.printStackTrace();
+		}
+		
+		try {
 			client.loadModel(new FileInputStream(args[0]));
 		} catch (FileNotFoundException | RenderEngineException e) {
 			e.printStackTrace();
@@ -33,13 +40,8 @@ public class ClientRunner {
 					return;
 				}
 				System.out.println(String.format("%s %s", instance.getType(), instance.getGuid()));
-				float area = instance.getExtendedDataAsFloat("TOTAL_SURFACE_AREA");
-				float volume = instance.getExtendedDataAsFloat("TOTAL_SHAPE_VOLUME");
-				if (instance.getType().equals("IfcSpace")) {
-					float walkable = instance.getExtendedDataAsFloat("WALKABLE_SURFACE_AREA");
-					System.out.println(String.format("Volume: %.2f; Area: %.2f; Walkable %.2f", volume, area, walkable));
-				} else {
-					System.out.println(String.format("Volume: %.2f; Area: %.2f", volume, area));
+				for (Map.Entry<String, Double> e : instance.getAllExtendedData().entrySet()) {
+					System.out.println(String.format("%s: %.2f", e.getKey(), e.getValue()));
 				}
 			} catch (RenderEngineException e) {
 				e.printStackTrace();

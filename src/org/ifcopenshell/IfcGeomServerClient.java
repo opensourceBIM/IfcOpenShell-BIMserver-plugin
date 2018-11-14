@@ -52,6 +52,31 @@ import com.google.gson.JsonSyntaxException;
 public class IfcGeomServerClient implements AutoCloseable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IfcGeomServerClient.class);
 	
+	private boolean calculate_quantities = false;
+	private boolean apply_layersets = false;
+	
+	public boolean doesCalculateQuantities() {
+		return calculate_quantities;
+	}
+
+	public void setCalculateQuantities(boolean calculate_quantities) throws RenderEngineException {
+		if (process != null) {
+			throw new RenderEngineException("Cannot be changed when running");
+		}
+		this.calculate_quantities = calculate_quantities;
+	}
+
+	public boolean doesApplyLayersets() {
+		return apply_layersets;
+	}
+
+	public void setApplyLayersets(boolean apply_layersets) throws RenderEngineException {
+		if (process != null) {
+			throw new RenderEngineException("Cannot be changed when running");
+		}
+		this.apply_layersets = apply_layersets;
+	}
+
 	private Process process = null;
 	private LittleEndianDataInputStream dis = null;
 	private LittleEndianDataOutputStream dos = null;
@@ -133,7 +158,7 @@ public class IfcGeomServerClient implements AutoCloseable {
 	private void getExecutable(ExecutableSource source, Path homeDir) throws RenderEngineException {
 		if (source == ExecutableSource.REPOSITORY) {
 			try {
-				initialize(getExecutablePathFromRepo(getSourcePath()).toString());
+				this.executableFilename = getExecutablePathFromRepo(getSourcePath()).toString();
 			} catch (PluginException e) {
 				throw new RenderEngineException(e);
 			}
@@ -198,7 +223,7 @@ public class IfcGeomServerClient implements AutoCloseable {
 							} catch (Exception e) {}
 						}
 						
-						initialize(exePath.toString());
+						this.executableFilename = exePath.toString();
 						initialized = true;
 						break;
 					}
@@ -213,14 +238,12 @@ public class IfcGeomServerClient implements AutoCloseable {
 	}
 	
 	public IfcGeomServerClient(String executableFilename) throws RenderEngineException {
-		initialize(executableFilename);
+		this.executableFilename = executableFilename;
 	}
 	
-	private void initialize(String executableFilename) throws RenderEngineException {
+	public void initialize() throws RenderEngineException {
 		try {
-			this.executableFilename = executableFilename;
-			
-			process = Runtime.getRuntime().exec(executableFilename);
+			process = Runtime.getRuntime().exec(this.executableFilename);
 			dos = new LittleEndianDataOutputStream(process.getOutputStream());
 			dis = new LittleEndianDataInputStream(process.getInputStream());
 			
@@ -236,12 +259,26 @@ public class IfcGeomServerClient implements AutoCloseable {
 				terminate();
 				throw new RenderEngineException(String.format("Version mismatch: Plugin version %s does not match IfcOpenShell version %s", VERSION, reportedVersion));
 			}
+			
+			if (calculate_quantities) {
+				Setting s = new Setting(Setting.SettingId.CALCULATE_QUANTITITES, true);
+				s.write(dos);
+			}
+			
+			if (apply_layersets) {
+				Setting s = new Setting(Setting.SettingId.APPLY_LAYERSETS, true);
+				s.write(dos);
+			}
 		} catch (IOException e) {
 			throw new RenderEngineException(e);
 		}
 	}
 	
 	public void loadModel(InputStream inputStream) throws RenderEngineException {
+		if (process == null) {
+			initialize();
+		}
+		
 		IfcModel m = new IfcModel(inputStream);
 		try {
 			m.write(dos);
@@ -587,6 +624,7 @@ public class IfcGeomServerClient implements AutoCloseable {
 		private int value;
 
 		public enum SettingId {
+			CALCULATE_QUANTITITES (1 << 4),
 			APPLY_LAYERSETS (1 << 17);
 
 			private final int id;

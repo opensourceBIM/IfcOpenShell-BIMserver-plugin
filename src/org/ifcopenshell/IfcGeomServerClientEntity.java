@@ -1,5 +1,8 @@
 package org.ifcopenshell;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /******************************************************************************
  * Copyright (C) 2009-2018  BIMserver.org
  * 
@@ -23,6 +26,7 @@ import org.bimserver.plugins.renderengine.RenderEngineException;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 
 public class IfcGeomServerClientEntity {
 	private int id;
@@ -120,14 +124,25 @@ public class IfcGeomServerClientEntity {
 		return colors.length / 4;
 	}
 	
-	public float getExtendedDataAsFloat(String name) throws RenderEngineException {
-		if (this.extendedData == null) {
-			throw new RenderEngineException("No extended data for Entity " + this.guid);
+	public Map<String, Double> getAllExtendedData() throws RenderEngineException {
+		HashMap<String, Double> m = new HashMap<String, Double>();
+		if (this.extendedData != null) {
+			for (Map.Entry<String, JsonElement> e : extendedData.entrySet()) {
+				if (e.getValue().isJsonPrimitive()) {
+					JsonPrimitive prim = e.getValue().getAsJsonPrimitive();
+					if (prim.isNumber()) {
+						m.put(e.getKey(), e.getValue().getAsDouble());
+					} else if (prim.isString()) {
+						// The C++ JSON formatter based on boost::property_tree only emits
+						// string values: https://svn.boost.org/trac10/ticket/9496
+						try {
+							Double v = Double.parseDouble(prim.getAsString());
+							m.put(e.getKey(), v);
+						} catch(NumberFormatException ex) {}
+					}
+				}
+			}
 		}
-		JsonElement elem = extendedData.get(name);
-		if (elem == null) {
-			throw new RenderEngineException("No extended data entry found for " + name);
-		}
-		return elem.getAsFloat();
+		return m;
 	}
 }
