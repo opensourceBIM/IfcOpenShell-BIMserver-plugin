@@ -19,6 +19,8 @@
 
 package org.ifcopenshell;
 
+import java.util.Map;
+
 /******************************************************************************
  * Copyright (C) 2009-2018  BIMserver.org
  * 
@@ -62,15 +64,17 @@ public class IfcOpenShellEntityInstance implements RenderEngineInstance {
 
 	@Override
 	public double getArea() throws RenderEngineException {
+		Map<String, Double> allExtendedData = entity.getAllExtendedData();
 		if (entity.getType().equalsIgnoreCase("IfcSpace")) {
-			return entity.getAllExtendedData().get("WALKABLE_SURFACE_AREA");
+			return allExtendedData.containsKey("WALKABLE_SURFACE_AREA") ? allExtendedData.get("WALKABLE_SURFACE_AREA") : 0;
 		} else {
-			return entity.getAllExtendedData().get("TOTAL_SURFACE_AREA");
+			return allExtendedData.containsKey("TOTAL_SURFACE_AREA") ? allExtendedData.get("TOTAL_SURFACE_AREA") : 0;
 		}
 	}
 	
 	@Override
 	public double getVolume() throws RenderEngineException {
-		return entity.getAllExtendedData().get("TOTAL_SHAPE_VOLUME");
+		Map<String, Double> allExtendedData = entity.getAllExtendedData();
+		return allExtendedData.containsKey("TOTAL_SHAPE_VOLUME") ? allExtendedData.get("TOTAL_SHAPE_VOLUME") : 0;
 	}
 }
