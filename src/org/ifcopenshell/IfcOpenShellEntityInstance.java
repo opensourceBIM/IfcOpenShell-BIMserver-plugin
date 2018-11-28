@@ -19,8 +19,6 @@
 
 package org.ifcopenshell;
 
-import java.util.Map;
-
 /******************************************************************************
  * Copyright (C) 2009-2018  BIMserver.org
  * 
@@ -42,6 +40,8 @@ import org.bimserver.plugins.renderengine.RenderEngineException;
 import org.bimserver.plugins.renderengine.RenderEngineGeometry;
 import org.bimserver.plugins.renderengine.RenderEngineInstance;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 public class IfcOpenShellEntityInstance implements RenderEngineInstance {
 	private IfcGeomServerClientEntity entity;
 
@@ -62,19 +62,7 @@ public class IfcOpenShellEntityInstance implements RenderEngineInstance {
 		return new RenderEngineGeometry(entity.getIndices(), entity.getPositions(), entity.getNormals(), entity.getColors(), entity.getMaterialIndices());
 	}
 
-	@Override
-	public double getArea() throws RenderEngineException {
-		Map<String, Double> allExtendedData = entity.getAllExtendedData();
-		if (entity.getType().equalsIgnoreCase("IfcSpace")) {
-			return allExtendedData.containsKey("WALKABLE_SURFACE_AREA") ? allExtendedData.get("WALKABLE_SURFACE_AREA") : 0;
-		} else {
-			return allExtendedData.containsKey("TOTAL_SURFACE_AREA") ? allExtendedData.get("TOTAL_SURFACE_AREA") : 0;
-		}
-	}
-	
-	@Override
-	public double getVolume() throws RenderEngineException {
-		Map<String, Double> allExtendedData = entity.getAllExtendedData();
-		return allExtendedData.containsKey("TOTAL_SHAPE_VOLUME") ? allExtendedData.get("TOTAL_SHAPE_VOLUME") : 0;
+	public ObjectNode getAdditionalData() throws RenderEngineException {
+		return entity.getAllExtendedData();
 	}
 }

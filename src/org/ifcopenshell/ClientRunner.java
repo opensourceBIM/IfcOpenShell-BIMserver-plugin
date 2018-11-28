@@ -2,7 +2,6 @@ package org.ifcopenshell;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.Map;
 
 import org.bimserver.plugins.renderengine.RenderEngineException;
 
@@ -40,9 +39,7 @@ public class ClientRunner {
 					return;
 				}
 				System.out.println(String.format("%s %s", instance.getType(), instance.getGuid()));
-				for (Map.Entry<String, Double> e : instance.getAllExtendedData().entrySet()) {
-					System.out.println(String.format("%s: %.2f", e.getKey(), e.getValue()));
-				}
+				System.out.println(instance.getAllExtendedData().toString());
 			} catch (RenderEngineException e) {
 				e.printStackTrace();
 				return;

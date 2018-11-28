@@ -1,7 +1,6 @@
 package org.ifcopenshell;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
 
 /******************************************************************************
  * Copyright (C) 2009-2018  BIMserver.org
@@ -23,12 +22,11 @@ import java.util.Map;
 import org.bimserver.geometry.Matrix;
 import org.bimserver.plugins.renderengine.RenderEngineException;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class IfcGeomServerClientEntity {
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 	private int id;
 	private String guid;
 	private String name;
@@ -41,7 +39,7 @@ public class IfcGeomServerClientEntity {
 	private int[] indices;
 	private float[] colors;
 	private int[] materialIndices;
-	private JsonObject extendedData;
+	private ObjectNode extendedData;
 	
 	public IfcGeomServerClientEntity(int id, String guid, String name,
 			String type, int parentId, double[] matrix, int repId,
@@ -61,10 +59,13 @@ public class IfcGeomServerClientEntity {
 		this.colors = colors;
 		this.materialIndices = materialIndices;
 		
-		this.extendedData = null;
 		if (messageRemainder != null && messageRemainder.length() > 0) {
 			// un-pad string
-			this.extendedData = new JsonParser().parse(messageRemainder.trim()).getAsJsonObject();
+			try {
+				this.extendedData = OBJECT_MAPPER.readValue(messageRemainder.trim(), ObjectNode.class);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -124,25 +125,7 @@ public class IfcGeomServerClientEntity {
 		return colors.length / 4;
 	}
 	
-	public Map<String, Double> getAllExtendedData() throws RenderEngineException {
-		HashMap<String, Double> m = new HashMap<String, Double>();
-		if (this.extendedData != null) {
-			for (Map.Entry<String, JsonElement> e : extendedData.entrySet()) {
-				if (e.getValue().isJsonPrimitive()) {
-					JsonPrimitive prim = e.getValue().getAsJsonPrimitive();
-					if (prim.isNumber()) {
-						m.put(e.getKey(), e.getValue().getAsDouble());
-					} else if (prim.isString()) {
-						// The C++ JSON formatter based on boost::property_tree only emits
-						// string values: https://svn.boost.org/trac10/ticket/9496
-						try {
-							Double v = Double.parseDouble(prim.getAsString());
-							m.put(e.getKey(), v);
-						} catch(NumberFormatException ex) {}
-					}
-				}
-			}
-		}
-		return m;
+	public ObjectNode getAllExtendedData() throws RenderEngineException {
+		return this.extendedData;
 	}
 }
