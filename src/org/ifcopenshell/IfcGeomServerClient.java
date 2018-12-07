@@ -629,7 +629,7 @@ public class IfcGeomServerClient implements AutoCloseable {
 
 		public enum SettingId {
 			CALCULATE_QUANTITITES (1 << 4),
-			APPLY_LAYERSETS (1 << 17);
+			APPLY_LAYERSETS (1 << 13);
 
 			private final int id;
 			SettingId(int id) {

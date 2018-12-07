@@ -30,6 +30,8 @@ public class ClientRunner {
 			e.printStackTrace();
 			return;
 		}
+		
+		double t0 = java.lang.System.nanoTime();
 
 		while (client.hasNext()) {
 			try {
@@ -45,7 +47,10 @@ public class ClientRunner {
 				return;
 			}
 		}
-		System.exit(0); 
+		
+		System.out.println(String.format("Conversion took %.2f seconds", (java.lang.System.nanoTime() - t0) / 1.e9));
+		
+		System.exit(0);
 	}
 	
 }
