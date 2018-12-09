@@ -69,6 +69,7 @@ public class IfcOpenShellEngine implements RenderEngine {
 		
 		client = new IfcGeomServerClient(executableFilename);
 		client.setCalculateQuantities(true);
+		client.setApplyLayersets(true);
 		version = client.getVersion();
 	}
 	

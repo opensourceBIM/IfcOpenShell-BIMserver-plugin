@@ -15,6 +15,11 @@ public class ClientRunner {
 			} catch (RenderEngineException e1) {
 				e1.printStackTrace();
 			}
+			try {
+				client.setApplyLayersets(true);
+			} catch (RenderEngineException e1) {
+				e1.printStackTrace();
+			}
 			
 			try {
 				client.loadModel(new FileInputStream(args[0]));
@@ -23,6 +28,8 @@ public class ClientRunner {
 				return;
 			}
 			
+			double t0 = java.lang.System.nanoTime();
+
 			while (client.hasNext()) {
 				try {
 					IfcGeomServerClientEntity instance = client.getNext();
@@ -37,48 +44,13 @@ public class ClientRunner {
 					return;
 				}
 			}
-			System.exit(0); 
+			
+			System.out.println(String.format("Conversion took %.2f seconds", (java.lang.System.nanoTime() - t0) / 1.e9));
+			
 		} catch (RenderEngineException e) {
 			e.printStackTrace();
 			return;
 		}
-		
-<<<<<<< HEAD
-=======
-		try {
-			client.setCalculateQuantities(true);
-		} catch (RenderEngineException e1) {
-			e1.printStackTrace();
-		}
-		
-		try {
-			client.loadModel(new FileInputStream(args[0]));
-		} catch (FileNotFoundException | RenderEngineException e) {
-			e.printStackTrace();
-			return;
-		}
-		
-		double t0 = java.lang.System.nanoTime();
-
-		while (client.hasNext()) {
-			try {
-				IfcGeomServerClientEntity instance = client.getNext();
-				if (instance == null) {
-					System.out.println("Internal error");
-					return;
-				}
-				System.out.println(String.format("%s %s", instance.getType(), instance.getGuid()));
-				System.out.println(instance.getAllExtendedData().toString());
-			} catch (RenderEngineException e) {
-				e.printStackTrace();
-				return;
-			}
-		}
-		
-		System.out.println(String.format("Conversion took %.2f seconds", (java.lang.System.nanoTime() - t0) / 1.e9));
-		
 		System.exit(0);
->>>>>>> branch 'master' of https://github.com/opensourceBIM/IfcOpenShell-BIMserver-plugin.git
 	}
-	
 }
