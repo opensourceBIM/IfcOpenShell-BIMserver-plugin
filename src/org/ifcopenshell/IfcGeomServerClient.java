@@ -595,7 +595,12 @@ public class IfcGeomServerClient implements AutoCloseable {
 		private int value;
 
 		public enum SettingId {
+<<<<<<< HEAD
 			CALCULATE_QUANTITITES(1 << 4), APPLY_LAYERSETS(1 << 17);
+=======
+			CALCULATE_QUANTITITES (1 << 4),
+			APPLY_LAYERSETS (1 << 13);
+>>>>>>> branch 'master' of https://github.com/opensourceBIM/IfcOpenShell-BIMserver-plugin.git
 
 			private final int id;
 
