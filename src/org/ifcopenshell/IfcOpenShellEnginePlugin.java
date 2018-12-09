@@ -44,7 +44,12 @@ package org.ifcopenshell;
  *****************************************************************************/
 
 import java.io.IOException;
+
 import org.bimserver.models.store.ObjectDefinition;
+import org.bimserver.models.store.ParameterDefinition;
+import org.bimserver.models.store.PrimitiveDefinition;
+import org.bimserver.models.store.PrimitiveEnum;
+import org.bimserver.models.store.StoreFactory;
 import org.bimserver.plugins.PluginConfiguration;
 import org.bimserver.plugins.PluginContext;
 import org.bimserver.plugins.renderengine.RenderEngine;
@@ -56,6 +61,9 @@ import org.slf4j.LoggerFactory;
 
 public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IfcOpenShellEnginePlugin.class);
+	public static final String BRANCH = "v0.6.0";
+	public static final String DEFAULT_COMMIT_SHA = "4f8b430";
+	private static final String COMMIT_SHA_SETTING = "commitsha";
 	private String executableFilename;
 	
 	@Override
@@ -68,17 +76,43 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	}
 
 	@Override
-	public void init(PluginContext pluginContext) throws PluginException {
+	public void init(PluginContext pluginContext, PluginConfiguration systemSettings) throws PluginException {
 		// Make sure an executable is downloaded before invoking the plug-in using multiple threads.
 		// This also checks whether the version of the executable matches the java source.
-		IfcGeomServerClient test = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3, pluginContext.getTempDir());
+		
+		String commitSha = DEFAULT_COMMIT_SHA;
+		if (systemSettings != null && systemSettings.getString(COMMIT_SHA_SETTING) != null) {
+			// Overruled by system settings
+			commitSha = systemSettings.getString(COMMIT_SHA_SETTING);
+			LOGGER.info("Using overruled system setting for commit sha");
+		}
+		
+		IfcGeomServerClient test = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3, commitSha, pluginContext.getTempDir());
 		executableFilename = test.getExecutableFilename();
 		LOGGER.info("Using " + executableFilename);
 		test.close();
 	}
 
 	@Override
-	public ObjectDefinition getSettingsDefinition() {
+	public ObjectDefinition getUserSettingsDefinition() {
 		return null;
+	}
+	
+	@Override
+	public ObjectDefinition getSystemSettingsDefinition() {
+		ObjectDefinition settings = StoreFactory.eINSTANCE.createObjectDefinition();
+		
+		PrimitiveDefinition stringType = StoreFactory.eINSTANCE.createPrimitiveDefinition();
+		stringType.setType(PrimitiveEnum.STRING);
+		
+		ParameterDefinition commitShaParameter = StoreFactory.eINSTANCE.createParameterDefinition();
+		commitShaParameter.setIdentifier(COMMIT_SHA_SETTING);
+		commitShaParameter.setName("Commit Sha");
+		commitShaParameter.setDescription("Commit sha of IfcOpenShell binary, this overrules the default for the currently installated IfcOpenShell plugin");
+		commitShaParameter.setType(stringType);
+		commitShaParameter.setRequired(false);
+		
+		settings.getParameters().add(commitShaParameter);
+		return settings;
 	}
 }
