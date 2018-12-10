@@ -45,19 +45,19 @@ package org.ifcopenshell;
 
 import java.io.IOException;
 import java.io.InputStream;
+
 import org.bimserver.plugins.renderengine.RenderEngine;
 import org.bimserver.plugins.renderengine.RenderEngineException;
 import org.bimserver.plugins.renderengine.RenderEngineModel;
+import org.bimserver.plugins.renderengine.VersionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IfcOpenShellEngine implements RenderEngine {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IfcOpenShellEngine.class);
 	private String executableFilename;
-	public static final Boolean debug = false;
 
 	private IfcGeomServerClient client;
-	private String version;
 	
 	public IfcOpenShellEngine(String executableFilename) throws IOException {
 		this.executableFilename = executableFilename;
@@ -70,11 +70,6 @@ public class IfcOpenShellEngine implements RenderEngine {
 		client = new IfcGeomServerClient(executableFilename);
 		client.setCalculateQuantities(true);
 		client.setApplyLayersets(true);
-		version = client.getVersion();
-	}
-	
-	public String getVersion() {
-		return version;
 	}
 	
 	@Override

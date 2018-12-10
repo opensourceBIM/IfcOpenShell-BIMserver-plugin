@@ -91,7 +91,7 @@ public class IfcOpenShellModel implements RenderEngineModel {
 		try {
 			ifcInputStream.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 

@@ -55,6 +55,7 @@ import org.bimserver.plugins.PluginContext;
 import org.bimserver.plugins.renderengine.RenderEngine;
 import org.bimserver.plugins.renderengine.RenderEngineException;
 import org.bimserver.plugins.renderengine.RenderEnginePlugin;
+import org.bimserver.plugins.renderengine.VersionInfo;
 import org.bimserver.shared.exceptions.PluginException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +66,8 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	public static final String DEFAULT_COMMIT_SHA = "4f8b430";
 	private static final String COMMIT_SHA_SETTING = "commitsha";
 	private String executableFilename;
-	
+	private VersionInfo versionInfo;
+
 	@Override
 	public RenderEngine createRenderEngine(PluginConfiguration pluginConfiguration, String schema) throws RenderEngineException {
 		try {
@@ -89,6 +91,9 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		
 		IfcGeomServerClient test = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3, commitSha, pluginContext.getTempDir());
 		executableFilename = test.getExecutableFilename();
+		
+		versionInfo = new VersionInfo(BRANCH, commitSha, test.getBuildDateTime());
+		
 		LOGGER.info("Using " + executableFilename);
 		test.close();
 	}
@@ -114,5 +119,9 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		
 		settings.getParameters().add(commitShaParameter);
 		return settings;
+	}
+	
+	public VersionInfo getVersionInfo() {
+		return versionInfo;
 	}
 }

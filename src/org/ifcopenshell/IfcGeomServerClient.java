@@ -30,9 +30,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.DateUtils;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.bimserver.plugins.renderengine.RenderEngineException;
 import org.bimserver.shared.exceptions.PluginException;
 import org.slf4j.Logger;
@@ -79,6 +86,8 @@ public class IfcGeomServerClient implements AutoCloseable {
 	private volatile boolean running = true;
 
 	private String executableFilename;
+
+	private GregorianCalendar buildDateTime;
 
 	public String getExecutableFilename() {
 		return executableFilename;
@@ -175,12 +184,20 @@ public class IfcGeomServerClient implements AutoCloseable {
 					Files.createDirectories(exePath.getParent());
 					LOGGER.info(String.format("Unzipping to %s", exePath.toString()));
 					
-					try (InputStream openStream = new URL(url).openStream()) {
-						try (ZipInputStream zipInputStream = new ZipInputStream(openStream)) {
-							try (OutputStream fos = Files.newOutputStream(exePath)) {
-								// tfk: assume single entry
-								zipInputStream.getNextEntry();
-								ByteStreams.copy(zipInputStream, fos);
+					try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+						HttpGet httpGet = new HttpGet(url);
+						try (CloseableHttpResponse httpResponse = httpClient.execute(httpGet)) {
+							Header lastModified = httpResponse.getFirstHeader("Last-Modified");
+							LOGGER.info("IfcOpenShell Last Modified: " + lastModified.getValue());
+							buildDateTime = new GregorianCalendar();
+							buildDateTime.setTime(DateUtils.parseDate(lastModified.getValue()));
+							
+							try (ZipInputStream zipInputStream = new ZipInputStream(httpResponse.getEntity().getContent())) {
+								try (OutputStream fos = Files.newOutputStream(exePath)) {
+									// tfk: assume single entry
+									zipInputStream.getNextEntry();
+									ByteStreams.copy(zipInputStream, fos);
+								}
 							}
 						}
 					}
@@ -740,5 +757,9 @@ public class IfcGeomServerClient implements AutoCloseable {
 
 	public String getVersion() {
 		return VERSION;
+	}
+
+	public GregorianCalendar getBuildDateTime() {
+		return buildDateTime;
 	}
 }
