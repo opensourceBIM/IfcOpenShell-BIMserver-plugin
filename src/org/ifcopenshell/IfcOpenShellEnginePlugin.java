@@ -92,7 +92,7 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		IfcGeomServerClient test = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3, commitSha, pluginContext.getTempDir());
 		executableFilename = test.getExecutableFilename();
 		
-		versionInfo = new VersionInfo(BRANCH, commitSha, test.getBuildDateTime());
+		versionInfo = new VersionInfo(BRANCH, commitSha, test.getVersion(), test.getBuildDateTime());
 		
 		LOGGER.info("Using " + executableFilename);
 		test.close();
