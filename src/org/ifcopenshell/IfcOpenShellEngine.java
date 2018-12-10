@@ -49,7 +49,6 @@ import java.io.InputStream;
 import org.bimserver.plugins.renderengine.RenderEngine;
 import org.bimserver.plugins.renderengine.RenderEngineException;
 import org.bimserver.plugins.renderengine.RenderEngineModel;
-import org.bimserver.plugins.renderengine.VersionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
