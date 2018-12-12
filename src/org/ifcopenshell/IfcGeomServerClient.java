@@ -28,6 +28,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Collections;
 import java.util.GregorianCalendar;
@@ -85,11 +86,11 @@ public class IfcGeomServerClient implements AutoCloseable {
 
 	private volatile boolean running = true;
 
-	private String executableFilename;
+	private Path executableFilename;
 
 	private GregorianCalendar buildDateTime;
 
-	public String getExecutableFilename() {
+	public Path getExecutableFilename() {
 		return executableFilename;
 	}
 
@@ -99,7 +100,7 @@ public class IfcGeomServerClient implements AutoCloseable {
 		terminate();
 	}
 
-	private static String getOs() throws PluginException {
+	private static String getOs() throws RenderEngineException {
 		final String os = System.getProperty("os.name").toLowerCase();
 		if (os.contains("windows")) {
 			return "win";
@@ -108,7 +109,7 @@ public class IfcGeomServerClient implements AutoCloseable {
 		} else if (os.contains("linux")) {
 			return "linux";
 		} else {
-			throw new PluginException(String.format("IfcOpenShell is not available on the %s platorm", os));
+			throw new RenderEngineException(String.format("IfcOpenShell is not available on the %s platorm", os));
 		}
 	}
 
@@ -155,59 +156,67 @@ public class IfcGeomServerClient implements AutoCloseable {
 	private void getExecutable(ExecutableSource source, String commitSha, Path homeDir) throws RenderEngineException {
 		if (source == ExecutableSource.REPOSITORY) {
 			try {
-				this.executableFilename = getExecutablePathFromRepo(getSourcePath()).toString();
+				this.executableFilename = getExecutablePathFromRepo(getSourcePath());
+				FileTime fileTime = (FileTime) Files.getAttribute(this.executableFilename, "creationTime");
+				buildDateTime = new GregorianCalendar();
+				buildDateTime.setTimeInMillis(fileTime.toMillis());
 			} catch (PluginException e) {
+				throw new RenderEngineException(e);
+			} catch (IOException e) {
 				throw new RenderEngineException(e);
 			}
 		} else if (source == ExecutableSource.S3) {
 			boolean initialized = false;
-			String platform = "unknown";
 			
+			String platform = getPlatform();
 			try {
-				String os = getOs();
-				
-				if (os == "osx") {
-					platform = "macos64";
-				} else {
-					platform = os.toLowerCase() + System.getProperty("sun.arch.data.model");
-				}
-				
 				String url = "https://s3.amazonaws.com/ifcopenshell-builds/IfcGeomServer-" + IfcOpenShellEnginePlugin.BRANCH + "-" + commitSha + "-" + platform + ".zip";
 				
 				String baseName = new File(new URL(url).getPath()).getName();
 				baseName = baseName.substring(0, baseName.length() - 4);
 				baseName += getExecutableExtension();
-				Path exePath = homeDir.resolve(baseName);
+				this.executableFilename = homeDir.resolve(baseName);
 				
-				if (!Files.exists(exePath)) {			
+				if (!Files.exists(this.executableFilename)) {
 					LOGGER.info(String.format("Downloading from %s", url));
-					Files.createDirectories(exePath.getParent());
-					LOGGER.info(String.format("Unzipping to %s", exePath.toString()));
+					Files.createDirectories(this.executableFilename.getParent());
+					LOGGER.info(String.format("Unzipping to %s", this.executableFilename.toString()));
 					
 					try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
 						HttpGet httpGet = new HttpGet(url);
 						try (CloseableHttpResponse httpResponse = httpClient.execute(httpGet)) {
-							Header lastModified = httpResponse.getFirstHeader("Last-Modified");
-							LOGGER.info("IfcOpenShell Last Modified: " + lastModified.getValue());
-							buildDateTime = new GregorianCalendar();
-							buildDateTime.setTime(DateUtils.parseDate(lastModified.getValue()));
-							
-							try (ZipInputStream zipInputStream = new ZipInputStream(httpResponse.getEntity().getContent())) {
-								try (OutputStream fos = Files.newOutputStream(exePath)) {
-									// tfk: assume single entry
-									zipInputStream.getNextEntry();
-									ByteStreams.copy(zipInputStream, fos);
+							if (httpResponse.getStatusLine().getStatusCode() == 200) {
+								Header lastModified = httpResponse.getFirstHeader("Last-Modified");
+								LOGGER.info("IfcOpenShell Last Modified: " + lastModified.getValue());
+								buildDateTime = new GregorianCalendar();
+								buildDateTime.setTime(DateUtils.parseDate(lastModified.getValue()));
+								
+								try (ZipInputStream zipInputStream = new ZipInputStream(httpResponse.getEntity().getContent())) {
+									try (OutputStream fos = Files.newOutputStream(this.executableFilename)) {
+										// tfk: assume single entry
+										zipInputStream.getNextEntry();
+										ByteStreams.copy(zipInputStream, fos);
+									}
 								}
+								
+								Files.setAttribute(this.executableFilename, "creationTime", FileTime.fromMillis(buildDateTime.getTimeInMillis()));
+							} else {
+								LOGGER.error(httpResponse.getStatusLine().toString());
+								LOGGER.error("File not found " + url);
+								throw new RenderEngineException("File not found " + url);
 							}
 						}
 					}
 					
 					try {
-						Files.setPosixFilePermissions(exePath, Collections.singleton(PosixFilePermission.OWNER_EXECUTE));
+						Files.setPosixFilePermissions(this.executableFilename, Collections.singleton(PosixFilePermission.OWNER_EXECUTE));
 					} catch (Exception e) {}
+				} else {
+					FileTime fileTime = (FileTime) Files.getAttribute(this.executableFilename, "creationTime");
+					buildDateTime = new GregorianCalendar();
+					buildDateTime.setTimeInMillis(fileTime.toMillis());
 				}
 				
-				this.executableFilename = exePath.toString();
 				initialized = true;
 			} catch (IOException | PluginException e) {
 				throw new RenderEngineException(e);
@@ -218,13 +227,13 @@ public class IfcGeomServerClient implements AutoCloseable {
 		}
 	}
 
-	public IfcGeomServerClient(String executableFilename) throws RenderEngineException {
+	public IfcGeomServerClient(Path executableFilename) throws RenderEngineException {
 		this.executableFilename = executableFilename;
 	}
 
 	public void initialize() throws RenderEngineException {
 		try {
-			process = Runtime.getRuntime().exec(this.executableFilename);
+			process = Runtime.getRuntime().exec(this.executableFilename.toAbsolutePath().toString());
 			dos = new LittleEndianDataOutputStream(process.getOutputStream());
 			dis = new LittleEndianDataInputStream(process.getInputStream());
 
@@ -761,5 +770,18 @@ public class IfcGeomServerClient implements AutoCloseable {
 
 	public GregorianCalendar getBuildDateTime() {
 		return buildDateTime;
+	}
+	
+	public String getPlatform() throws RenderEngineException {
+		String platform = "unknown";
+		String os = getOs();
+		
+		if (os == "osx") {
+			platform = "macos64";
+		} else {
+			platform = os.toLowerCase() + System.getProperty("sun.arch.data.model");
+		}
+		
+		return platform;
 	}
 }

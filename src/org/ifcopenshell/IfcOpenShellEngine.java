@@ -45,6 +45,7 @@ package org.ifcopenshell;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 
 import org.bimserver.plugins.renderengine.RenderEngine;
 import org.bimserver.plugins.renderengine.RenderEngineException;
@@ -54,11 +55,11 @@ import org.slf4j.LoggerFactory;
 
 public class IfcOpenShellEngine implements RenderEngine {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IfcOpenShellEngine.class);
-	private String executableFilename;
+	private Path executableFilename;
 
 	private IfcGeomServerClient client;
 	
-	public IfcOpenShellEngine(String executableFilename) throws IOException {
+	public IfcOpenShellEngine(Path executableFilename) throws IOException {
 		this.executableFilename = executableFilename;
 	}
 

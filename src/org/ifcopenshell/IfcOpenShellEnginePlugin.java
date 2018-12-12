@@ -44,6 +44,7 @@ package org.ifcopenshell;
  *****************************************************************************/
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 import org.bimserver.models.store.ObjectDefinition;
 import org.bimserver.models.store.ParameterDefinition;
@@ -65,7 +66,9 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	public static final String BRANCH = "v0.6.0";
 	public static final String DEFAULT_COMMIT_SHA = "7ed47de";
 	private static final String COMMIT_SHA_SETTING = "commitsha";
-	private String executableFilename;
+	private static final String CALCULATE_QUANTITIES_SETTING = "calculatequantities";
+	private static final String APPLY_LAYER_SETS = "applylayersets";
+	private Path executableFilename;
 	private VersionInfo versionInfo;
 
 	@Override
@@ -92,7 +95,7 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		IfcGeomServerClient test = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3, commitSha, pluginContext.getTempDir());
 		executableFilename = test.getExecutableFilename();
 		
-		versionInfo = new VersionInfo(BRANCH, commitSha, test.getVersion(), test.getBuildDateTime());
+		versionInfo = new VersionInfo(BRANCH, commitSha, test.getVersion(), test.getBuildDateTime(), test.getPlatform());
 		
 		LOGGER.info("Using " + executableFilename);
 		test.close();
@@ -109,6 +112,9 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		
 		PrimitiveDefinition stringType = StoreFactory.eINSTANCE.createPrimitiveDefinition();
 		stringType.setType(PrimitiveEnum.STRING);
+
+		PrimitiveDefinition booleanType = StoreFactory.eINSTANCE.createPrimitiveDefinition();
+		booleanType.setType(PrimitiveEnum.BOOLEAN);
 		
 		ParameterDefinition commitShaParameter = StoreFactory.eINSTANCE.createParameterDefinition();
 		commitShaParameter.setIdentifier(COMMIT_SHA_SETTING);
@@ -116,8 +122,24 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		commitShaParameter.setDescription("Commit sha of IfcOpenShell binary, this overrules the default for the currently installated IfcOpenShell plugin");
 		commitShaParameter.setType(stringType);
 		commitShaParameter.setRequired(false);
+
+		ParameterDefinition calculateQuantities = StoreFactory.eINSTANCE.createParameterDefinition();
+		calculateQuantities.setIdentifier("calcula");
+		calculateQuantities.setName("Calculate Quantities");
+		calculateQuantities.setDescription("Calculates volumes and areas, Takes a bit more time (about 15%)");
+		calculateQuantities.setType(booleanType);
+		calculateQuantities.setRequired(false);
+
+		ParameterDefinition applyLayerSets = StoreFactory.eINSTANCE.createParameterDefinition();
+		applyLayerSets.setIdentifier("calcula");
+		applyLayerSets.setName("Apply Layer Sets");
+		applyLayerSets.setDescription("Splits certain objects into several layers, depending on the model can take about 10x more processing time, and results in more geometry");
+		applyLayerSets.setType(booleanType);
+		applyLayerSets.setRequired(false);
 		
 		settings.getParameters().add(commitShaParameter);
+		settings.getParameters().add(calculateQuantities);
+		settings.getParameters().add(applyLayerSets);
 		return settings;
 	}
 	
