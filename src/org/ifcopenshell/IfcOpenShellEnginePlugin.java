@@ -74,7 +74,9 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	@Override
 	public RenderEngine createRenderEngine(PluginConfiguration pluginConfiguration, String schema) throws RenderEngineException {
 		try {
-			return new IfcOpenShellEngine(executableFilename);
+			boolean calculateQuantities = pluginConfiguration.getBoolean("CALCULATE_QUANTITIES_SETTING", true);
+			boolean applyLayerSets = pluginConfiguration.getBoolean("CALCULATE_QUANTITIES_SETTING", true);
+			return new IfcOpenShellEngine(executableFilename, calculateQuantities, applyLayerSets);
 		} catch (IOException e) {
 			throw new RenderEngineException(e);
 		}
@@ -124,14 +126,14 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		commitShaParameter.setRequired(false);
 
 		ParameterDefinition calculateQuantities = StoreFactory.eINSTANCE.createParameterDefinition();
-		calculateQuantities.setIdentifier("calcula");
+		calculateQuantities.setIdentifier(CALCULATE_QUANTITIES_SETTING);
 		calculateQuantities.setName("Calculate Quantities");
 		calculateQuantities.setDescription("Calculates volumes and areas, Takes a bit more time (about 15%)");
 		calculateQuantities.setType(booleanType);
 		calculateQuantities.setRequired(false);
 
 		ParameterDefinition applyLayerSets = StoreFactory.eINSTANCE.createParameterDefinition();
-		applyLayerSets.setIdentifier("calcula");
+		applyLayerSets.setIdentifier(APPLY_LAYER_SETS);
 		applyLayerSets.setName("Apply Layer Sets");
 		applyLayerSets.setDescription("Splits certain objects into several layers, depending on the model can take about 10x more processing time, and results in more geometry");
 		applyLayerSets.setType(booleanType);

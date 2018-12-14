@@ -58,9 +58,13 @@ public class IfcOpenShellEngine implements RenderEngine {
 	private Path executableFilename;
 
 	private IfcGeomServerClient client;
+	private boolean calculateQuantities;
+	private boolean applyLayerSets;
 	
-	public IfcOpenShellEngine(Path executableFilename) throws IOException {
+	public IfcOpenShellEngine(Path executableFilename, boolean calculateQuantities, boolean applyLayerSets) throws IOException {
 		this.executableFilename = executableFilename;
+		this.setCalculateQuantities(calculateQuantities);
+		this.setApplyLayerSets(applyLayerSets);
 	}
 
 	@Override
@@ -68,8 +72,8 @@ public class IfcOpenShellEngine implements RenderEngine {
 		LOGGER.debug("Initializing IfcOpenShell engine");
 		
 		client = new IfcGeomServerClient(executableFilename);
-		client.setCalculateQuantities(true);
-		client.setApplyLayersets(true);
+		client.setCalculateQuantities(isCalculateQuantities());
+		client.setApplyLayersets(isApplyLayerSets());
 	}
 	
 	@Override
@@ -102,5 +106,21 @@ public class IfcOpenShellEngine implements RenderEngine {
 		} catch (IOException e) {
 			throw new RenderEngineException(e);
 		}
+	}
+
+	public boolean isCalculateQuantities() {
+		return calculateQuantities;
+	}
+
+	public void setCalculateQuantities(boolean calculateQuantities) {
+		this.calculateQuantities = calculateQuantities;
+	}
+
+	public boolean isApplyLayerSets() {
+		return applyLayerSets;
+	}
+
+	public void setApplyLayerSets(boolean applyLayerSets) {
+		this.applyLayerSets = applyLayerSets;
 	}
 }
