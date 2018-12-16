@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
 public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IfcOpenShellEnginePlugin.class);
 	public static final String BRANCH = "v0.6.0";
-	public static final String DEFAULT_COMMIT_SHA = "7ed47de";
+	public static final String DEFAULT_COMMIT_SHA = "e3b415a";
 	private static final String COMMIT_SHA_SETTING = "commitsha";
 	private static final String CALCULATE_QUANTITIES_SETTING = "calculatequantities";
 	private static final String APPLY_LAYER_SETS = "applylayersets";
