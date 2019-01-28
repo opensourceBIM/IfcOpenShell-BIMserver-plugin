@@ -1,10 +1,9 @@
 <?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opensourcebim</groupId>
   <artifactId>ifcopenshellplugin</artifactId>
-  <version>0.5.43-SNAPSHOT</version>
+  <version>0.5.44</version>
   <name>IfcOpenShellPlugin</name>
   <description>BIMserver plugin that uses IfcOpenShell to generate geometry from IFC files</description>
   <url>https://github.com/opensourceBIM/IfcOpenShell-BIMserver-plugin</url>
@@ -28,7 +27,7 @@
   <scm>
     <connection>scm:git:https://github.com/opensourceBIM/IfcOpenShell-BIMserver-plugin.git</connection>
     <developerConnection>scm:git:https://github.com/opensourceBIM/IfcOpenShell-BIMserver-plugin.git</developerConnection>
-    <tag>ifcopenshellplugin-0.5.22</tag>
+    <tag>ifcopenshellplugin-0.5.44</tag>
     <url>https://github.com/opensourceBIM/IfcOpenShell-BIMserver-plugin.git</url>
   </scm>
   <issueManagement>
