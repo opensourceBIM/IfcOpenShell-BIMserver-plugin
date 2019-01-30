@@ -18,6 +18,7 @@ package org.ifcopenshell;
  *****************************************************************************/
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /******************************************************************************
  * Copyright (C) 2009-2018  BIMserver.org
@@ -51,17 +52,17 @@ public class IfcGeomServerClientEntity {
 	private int parentId;
 	private double[] matrix;
 	private int repId;
-	private float[] positions;
-	private float[] normals;
-	private int[] indices;
-	private float[] colors;
-	private int[] materialIndices;
+	private ByteBuffer positions;
+	private ByteBuffer normals;
+	private ByteBuffer indices;
+	private ByteBuffer colors;
+	private ByteBuffer materialIndices;
 	private ObjectNode extendedData;
 	
 	public IfcGeomServerClientEntity(int id, String guid, String name,
 			String type, int parentId, double[] matrix, int repId,
-			float[] positions, float[] normals, int[] indices, float[] colors,
-			int[] materialIndices, String messageRemainder) {
+			ByteBuffer positions, ByteBuffer normals, ByteBuffer indices, ByteBuffer colors,
+			ByteBuffer materialIndices, String messageRemainder) {
 		super();
 		this.id = id;
 		this.guid = guid;
@@ -114,32 +115,24 @@ public class IfcGeomServerClientEntity {
 		return repId;
 	}
 
-	public float[] getPositions() {
+	public ByteBuffer getPositions() {
 		return positions;
 	}
 
-	public float[] getNormals() {
+	public ByteBuffer getNormals() {
 		return normals;
 	}
 
-	public int[] getIndices() {
+	public ByteBuffer getIndices() {
 		return indices;
 	}
 
-	public float[] getColors() {
+	public ByteBuffer getColors() {
 		return colors;
 	}
 
-	public int[] getMaterialIndices() {
+	public ByteBuffer getMaterialIndices() {
 		return materialIndices;
-	}
-	
-	public int getNumberOfPrimitives() {
-		return indices.length / 3;
-	}
-	
-	public int getNumberOfColors() {
-		return colors.length / 4;
 	}
 	
 	public ObjectNode getAllExtendedData() throws RenderEngineException {

@@ -25,6 +25,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -368,6 +372,29 @@ public class IfcGeomServerClient implements AutoCloseable {
 			return fs;
 		}
 
+		protected ByteBuffer readByteBuffer(LittleEndianDataInputStream s) throws IOException {
+			int byteLength = s.readInt();
+			byte[] buffer = new byte[byteLength];
+			s.readFully(buffer);
+			return ByteBuffer.wrap(buffer);
+		}
+
+		// This method can be removed as soon as the binaries have been updated
+		protected ByteBuffer readByteFloatToDoubleBuffer(LittleEndianDataInputStream s) throws IOException {
+			int byteLength = s.readInt();
+			byte[] buffer = new byte[byteLength];
+			s.readFully(buffer);
+			ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
+			ByteBuffer newBuffer = ByteBuffer.allocate(buffer.length * 2);
+			FloatBuffer floatBuffer = byteBuffer.order(ByteOrder.LITTLE_ENDIAN).asFloatBuffer();
+			DoubleBuffer doubleBuffer = newBuffer.order(ByteOrder.LITTLE_ENDIAN).asDoubleBuffer();
+			int capacity = floatBuffer.capacity();
+			for (int i=0; i<capacity; i++) {
+				doubleBuffer.put(floatBuffer.get(i));
+			}
+			return newBuffer;
+		}
+
 		protected int[] readIntArray(LittleEndianDataInputStream s) throws IOException {
 			int len = s.readInt() / 4;
 			int[] is = new int[len];
@@ -537,8 +564,8 @@ public class IfcGeomServerClient implements AutoCloseable {
 			s0.readFully(message, 0, len);
 			ByteArrayInputStream bis = new ByteArrayInputStream(message);
 			LittleEndianDataInputStream s = new LittleEndianDataInputStream(bis);
-			entity = new IfcGeomServerClientEntity(s.readInt(), readString(s), readString(s), readString(s), s.readInt(), readDoubleArray(s), s.readInt(), readFloatArray(s), readFloatArray(s),
-					readIntArray(s), readFloatArray(s), readIntArray(s), readRemainder(bis));
+			entity = new IfcGeomServerClientEntity(s.readInt(), readString(s), readString(s), readString(s), s.readInt(), readDoubleArray(s), s.readInt(), readByteFloatToDoubleBuffer(s), readByteBuffer(s),
+					readByteBuffer(s), readByteBuffer(s), readByteBuffer(s), readRemainder(bis));
 		}
 
 		private String readRemainder(ByteArrayInputStream bis) {
