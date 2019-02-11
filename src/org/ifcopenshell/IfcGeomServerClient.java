@@ -36,6 +36,8 @@ import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Collections;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.IOUtils;
@@ -213,7 +215,11 @@ public class IfcGeomServerClient implements AutoCloseable {
 					}
 					
 					try {
-						Files.setPosixFilePermissions(this.executableFilename, Collections.singleton(PosixFilePermission.OWNER_EXECUTE));
+						Set<PosixFilePermission> permissions = new HashSet<>();
+						permissions.add(PosixFilePermission.OWNER_EXECUTE);
+						permissions.add(PosixFilePermission.OWNER_READ);
+						permissions.add(PosixFilePermission.OWNER_WRITE);
+						Files.setPosixFilePermissions(this.executableFilename, permissions);
 					} catch (Exception e) {}
 				} else {
 					FileTime fileTime = (FileTime) Files.getAttribute(this.executableFilename, "creationTime");
