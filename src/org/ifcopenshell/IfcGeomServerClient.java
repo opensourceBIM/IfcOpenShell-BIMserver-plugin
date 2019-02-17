@@ -34,7 +34,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermission;
-import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Set;
@@ -570,7 +569,7 @@ public class IfcGeomServerClient implements AutoCloseable {
 			s0.readFully(message, 0, len);
 			ByteArrayInputStream bis = new ByteArrayInputStream(message);
 			LittleEndianDataInputStream s = new LittleEndianDataInputStream(bis);
-			entity = new IfcGeomServerClientEntity(s.readInt(), readString(s), readString(s), readString(s), s.readInt(), readDoubleArray(s), s.readInt(), readByteFloatToDoubleBuffer(s), readByteBuffer(s),
+			entity = new IfcGeomServerClientEntity(s.readInt(), readString(s), readString(s), readString(s), s.readInt(), readDoubleArray(s), s.readInt(), readByteBuffer(s), readByteBuffer(s),
 					readByteBuffer(s), readByteBuffer(s), readByteBuffer(s), readRemainder(bis));
 		}
 
