@@ -51,6 +51,7 @@ import org.bimserver.models.store.ParameterDefinition;
 import org.bimserver.models.store.PrimitiveDefinition;
 import org.bimserver.models.store.PrimitiveEnum;
 import org.bimserver.models.store.StoreFactory;
+import org.bimserver.models.store.StringType;
 import org.bimserver.plugins.PluginConfiguration;
 import org.bimserver.plugins.PluginContext;
 import org.bimserver.plugins.renderengine.RenderEngine;
@@ -70,12 +71,12 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	private static final String APPLY_LAYER_SETS = "applylayersets";
 	private Path executableFilename;
 	private VersionInfo versionInfo;
+	private boolean calculateQuantities;
+	private boolean applyLayerSets;
 
 	@Override
 	public RenderEngine createRenderEngine(PluginConfiguration pluginConfiguration, String schema) throws RenderEngineException {
 		try {
-			boolean calculateQuantities = pluginConfiguration.getBoolean("CALCULATE_QUANTITIES_SETTING", true);
-			boolean applyLayerSets = pluginConfiguration.getBoolean("CALCULATE_QUANTITIES_SETTING", true);
 			return new IfcOpenShellEngine(executableFilename, calculateQuantities, applyLayerSets);
 		} catch (IOException e) {
 			throw new RenderEngineException(e);
@@ -86,21 +87,23 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	public void init(PluginContext pluginContext, PluginConfiguration systemSettings) throws PluginException {
 		// Make sure an executable is downloaded before invoking the plug-in using multiple threads.
 		// This also checks whether the version of the executable matches the java source.
+
+		calculateQuantities = systemSettings.getBoolean(CALCULATE_QUANTITIES_SETTING, true);
+		applyLayerSets = systemSettings.getBoolean(APPLY_LAYER_SETS, true);
 		
 		String commitSha = DEFAULT_COMMIT_SHA;
-		if (systemSettings != null && systemSettings.getString(COMMIT_SHA_SETTING) != null) {
+		if (systemSettings != null && systemSettings.getString(COMMIT_SHA_SETTING) != null && !systemSettings.getString(COMMIT_SHA_SETTING).trim().contentEquals("")) {
 			// Overruled by system settings
 			commitSha = systemSettings.getString(COMMIT_SHA_SETTING);
 			LOGGER.info("Using overruled system setting for commit sha");
 		}
 		
-		IfcGeomServerClient test = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3, commitSha, pluginContext.getTempDir());
-		executableFilename = test.getExecutableFilename();
-		
-		versionInfo = new VersionInfo(BRANCH, commitSha, test.getVersion(), test.getBuildDateTime(), test.getPlatform());
+		try (IfcGeomServerClient test = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3, commitSha, pluginContext.getTempDir())) {
+			executableFilename = test.getExecutableFilename();
+			versionInfo = new VersionInfo(BRANCH, commitSha, test.getVersion(), test.getBuildDateTime(), test.getPlatform());
+		}
 		
 		LOGGER.info("Using " + executableFilename);
-		test.close();
 	}
 
 	@Override
@@ -118,12 +121,16 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		PrimitiveDefinition booleanType = StoreFactory.eINSTANCE.createPrimitiveDefinition();
 		booleanType.setType(PrimitiveEnum.BOOLEAN);
 		
+		StringType defaultSha = StoreFactory.eINSTANCE.createStringType();
+		defaultSha.setValue(DEFAULT_COMMIT_SHA);
+		
 		ParameterDefinition commitShaParameter = StoreFactory.eINSTANCE.createParameterDefinition();
 		commitShaParameter.setIdentifier(COMMIT_SHA_SETTING);
 		commitShaParameter.setName("Commit Sha");
 		commitShaParameter.setDescription("Commit sha of IfcOpenShell binary, this overrules the default for the currently installated IfcOpenShell plugin");
 		commitShaParameter.setType(stringType);
 		commitShaParameter.setRequired(false);
+		commitShaParameter.setDefaultValue(defaultSha);
 
 		ParameterDefinition calculateQuantities = StoreFactory.eINSTANCE.createParameterDefinition();
 		calculateQuantities.setIdentifier(CALCULATE_QUANTITIES_SETTING);
