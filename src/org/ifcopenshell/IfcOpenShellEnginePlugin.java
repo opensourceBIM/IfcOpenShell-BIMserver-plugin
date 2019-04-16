@@ -46,6 +46,7 @@ package org.ifcopenshell;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import org.bimserver.models.store.BooleanType;
 import org.bimserver.models.store.ObjectDefinition;
 import org.bimserver.models.store.ParameterDefinition;
 import org.bimserver.models.store.PrimitiveDefinition;
@@ -71,8 +72,8 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	private static final String APPLY_LAYER_SETS = "applylayersets";
 	private Path executableFilename;
 	private VersionInfo versionInfo;
-	private boolean calculateQuantities;
-	private boolean applyLayerSets;
+	private boolean calculateQuantities = true;
+	private boolean applyLayerSets = true;
 
 	@Override
 	public RenderEngine createRenderEngine(PluginConfiguration pluginConfiguration, String schema) throws RenderEngineException {
@@ -88,8 +89,10 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		// Make sure an executable is downloaded before invoking the plug-in using multiple threads.
 		// This also checks whether the version of the executable matches the java source.
 
-		calculateQuantities = systemSettings.getBoolean(CALCULATE_QUANTITIES_SETTING, true);
-		applyLayerSets = systemSettings.getBoolean(APPLY_LAYER_SETS, true);
+		if (systemSettings != null) {
+			calculateQuantities = systemSettings.getBoolean(CALCULATE_QUANTITIES_SETTING, true);
+			applyLayerSets = systemSettings.getBoolean(APPLY_LAYER_SETS, true);
+		}
 		
 		String commitSha = DEFAULT_COMMIT_SHA;
 		if (systemSettings != null && systemSettings.getString(COMMIT_SHA_SETTING) != null && !systemSettings.getString(COMMIT_SHA_SETTING).trim().contentEquals("")) {
@@ -123,6 +126,9 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		
 		StringType defaultSha = StoreFactory.eINSTANCE.createStringType();
 		defaultSha.setValue(DEFAULT_COMMIT_SHA);
+
+		BooleanType defaultTrue = StoreFactory.eINSTANCE.createBooleanType();
+		defaultTrue.setValue(true);
 		
 		ParameterDefinition commitShaParameter = StoreFactory.eINSTANCE.createParameterDefinition();
 		commitShaParameter.setIdentifier(COMMIT_SHA_SETTING);
@@ -138,6 +144,7 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		calculateQuantities.setDescription("Calculates volumes and areas, Takes a bit more time (about 15%)");
 		calculateQuantities.setType(booleanType);
 		calculateQuantities.setRequired(false);
+		calculateQuantities.setDefaultValue(defaultTrue);
 
 		ParameterDefinition applyLayerSets = StoreFactory.eINSTANCE.createParameterDefinition();
 		applyLayerSets.setIdentifier(APPLY_LAYER_SETS);
@@ -145,6 +152,7 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		applyLayerSets.setDescription("Splits certain objects into several layers, depending on the model can take about 10x more processing time, and results in more geometry");
 		applyLayerSets.setType(booleanType);
 		applyLayerSets.setRequired(false);
+		applyLayerSets.setDefaultValue(defaultTrue);
 		
 		settings.getParameters().add(commitShaParameter);
 		settings.getParameters().add(calculateQuantities);
