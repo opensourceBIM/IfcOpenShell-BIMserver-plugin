@@ -260,17 +260,8 @@ public class IfcGeomServerClient implements AutoCloseable {
 				throw new RenderEngineException(String.format("Version mismatch: Plugin version %s does not match IfcOpenShell version %s", VERSION, reportedVersion));
 			}
 
-			LOGGER.info("Calculate quantities: " + calculateQuantities);
-			if (calculateQuantities) {
-				Setting s = new Setting(Setting.SettingId.CALCULATE_QUANTITITES, true);
-				s.write(dos);
-			}
-
-			LOGGER.info("Apply layer sets: " + applyLayersets);
-			if (applyLayersets) {
-				Setting s = new Setting(Setting.SettingId.APPLY_LAYERSETS, true);
-				s.write(dos);
-			}
+			new Setting(Setting.SettingId.CALCULATE_QUANTITITES, calculateQuantities).write(dos);
+			new Setting(Setting.SettingId.APPLY_LAYERSETS, applyLayersets).write(dos);
 		} catch (IOException e) {
 			throw new RenderEngineException(e);
 		}
