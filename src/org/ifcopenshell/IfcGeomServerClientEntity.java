@@ -45,11 +45,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class IfcGeomServerClientEntity {
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-	private int id;
+	private long id;
 	private String guid;
 	private String name;
 	private String type;
-	private int parentId;
+	private long parentId;
 	private double[] matrix;
 	private int repId;
 	private ByteBuffer positions;
@@ -59,8 +59,8 @@ public class IfcGeomServerClientEntity {
 	private ByteBuffer materialIndices;
 	private ObjectNode extendedData;
 	
-	public IfcGeomServerClientEntity(int id, String guid, String name,
-			String type, int parentId, double[] matrix, int repId,
+	public IfcGeomServerClientEntity(long id, String guid, String name,
+			String type, long parentId, double[] matrix, int repId,
 			ByteBuffer positions, ByteBuffer normals, ByteBuffer indices, ByteBuffer colors,
 			ByteBuffer materialIndices, String messageRemainder) {
 		super();
@@ -87,7 +87,7 @@ public class IfcGeomServerClientEntity {
 		}
 	}
 	
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 
@@ -103,7 +103,7 @@ public class IfcGeomServerClientEntity {
 		return type;
 	}
 
-	public int getParentId() {
+	public long getParentId() {
 		return parentId;
 	}
 

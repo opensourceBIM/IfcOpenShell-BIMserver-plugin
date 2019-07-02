@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.bimserver.plugins.renderengine.EntityNotFoundException;
 import org.bimserver.plugins.renderengine.RenderEngineException;
@@ -65,7 +66,7 @@ public class IfcOpenShellModel implements RenderEngineModel {
 	
 	private InputStream ifcInputStream;
 
-	private HashMap<Integer,IfcOpenShellEntityInstance> instancesById;
+	private Map<Long, IfcOpenShellEntityInstance> instancesById;
 
 	private IfcGeomServerClient client;
 	
@@ -98,7 +99,7 @@ public class IfcOpenShellModel implements RenderEngineModel {
 	@Override
 	public void generateGeneralGeometry() throws RenderEngineException {
 		// We keep track of instances ourselves
-		instancesById = new HashMap<Integer,IfcOpenShellEntityInstance>();
+		instancesById = new HashMap<Long, IfcOpenShellEntityInstance>();
 
 		final double t0 = (double) System.nanoTime();
 
@@ -115,14 +116,14 @@ public class IfcOpenShellModel implements RenderEngineModel {
 	}
 
 	@Override
-	public RenderEngineInstance getInstanceFromExpressId(int oid) throws RenderEngineException {
-		if ( instancesById.containsKey(oid) ) {
-			return instancesById.get(oid);
+	public RenderEngineInstance getInstanceFromExpressId(long expressId) throws RenderEngineException {
+		if (instancesById.containsKey(expressId)) {
+			return instancesById.get(expressId);
 		} else {
 			// Probably something went wrong with the processing of this element in
 			// the IfcOpenShell binary, as it has not been included in the enumerated
 			// set of elements with geometry.
-			throw new EntityNotFoundException("Entity " + oid + " not found in model");
+			throw new EntityNotFoundException("Entity " + expressId + " not found in model");
 		}
 	}
 	
