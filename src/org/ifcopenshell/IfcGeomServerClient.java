@@ -307,7 +307,7 @@ public class IfcGeomServerClient implements AutoCloseable {
 	private static final int DEFLECTION = LOG + 1;
 	private static final int SETTING = DEFLECTION + 1;
 
-	private static String VERSION = "IfcOpenShell-0.6.0a1-0";
+	private static String VERSION = "IfcOpenShell-0.6.0b0-0";
 
 	abstract static class Command {
 		abstract void read_contents(LittleEndianDataInputStream s) throws IOException;
