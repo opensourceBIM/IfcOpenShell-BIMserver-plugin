@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opensourcebim</groupId>
   <artifactId>ifcopenshellplugin</artifactId>
-  <version>0.5.70</version>
+  <version>0.5.71-SNAPSHOT</version>
   <name>IfcOpenShellPlugin</name>
   <description>BIMserver plugin that uses IfcOpenShell to generate geometry from IFC files</description>
   <url>https://github.com/opensourceBIM/IfcOpenShell-BIMserver-plugin</url>
@@ -27,7 +27,7 @@
   <scm>
     <connection>scm:git:https://github.com/opensourceBIM/IfcOpenShell-BIMserver-plugin.git</connection>
     <developerConnection>scm:git:https://github.com/opensourceBIM/IfcOpenShell-BIMserver-plugin.git</developerConnection>
-    <tag>ifcopenshellplugin-0.5.70</tag>
+    <tag>ifcopenshellplugin-0.5.22</tag>
     <url>https://github.com/opensourceBIM/IfcOpenShell-BIMserver-plugin.git</url>
   </scm>
   <issueManagement>
