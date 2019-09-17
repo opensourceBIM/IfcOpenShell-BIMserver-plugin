@@ -251,14 +251,6 @@ public class IfcGeomServerClient implements AutoCloseable {
 				terminate();
 				return;
 			}
-			Hello h = new Hello();
-			h.read(dis);
-
-			String reportedVersion = h.getString();
-			if (!VERSION.equals(reportedVersion)) {
-				terminate();
-				throw new RenderEngineException(String.format("Version mismatch: Plugin version %s does not match IfcOpenShell version %s", VERSION, reportedVersion));
-			}
 
 			new Setting(Setting.SettingId.CALCULATE_QUANTITITES, calculateQuantities).write(dos);
 			new Setting(Setting.SettingId.APPLY_LAYERSETS, applyLayersets).write(dos);
