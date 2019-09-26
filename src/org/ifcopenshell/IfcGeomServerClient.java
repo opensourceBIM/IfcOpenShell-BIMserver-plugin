@@ -252,6 +252,9 @@ public class IfcGeomServerClient implements AutoCloseable {
 				return;
 			}
 
+			Hello h = new Hello();
+			h.read(dis);
+			
 			new Setting(Setting.SettingId.CALCULATE_QUANTITITES, calculateQuantities).write(dos);
 			new Setting(Setting.SettingId.APPLY_LAYERSETS, applyLayersets).write(dos);
 		} catch (IOException e) {
