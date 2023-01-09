@@ -28,7 +28,6 @@
   <scm>
     <connection>scm:git:https://github.com/opensourceBIM/IfcOpenShell-BIMserver-plugin.git</connection>
     <developerConnection>scm:git:https://github.com/opensourceBIM/IfcOpenShell-BIMserver-plugin.git</developerConnection>
-    <tag>ifcopenshellplugin-0.5.22</tag>
     <url>https://github.com/opensourceBIM/IfcOpenShell-BIMserver-plugin.git</url>
   </scm>
   <issueManagement>
@@ -41,9 +40,8 @@
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
     <snapshotRepository>
-      <id>archiva.snapshots</id>
-      <name>Internal Snapshot Repository</name>
-      <url>${snapshotsrepo}/</url>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
   <properties>
@@ -55,7 +53,7 @@
     <dependency>
       <groupId>org.opensourcebim</groupId>
       <artifactId>pluginbase</artifactId>
-      <version>1.5.183-SNAPSHOT</version>
+      <version>1.5.183</version>
     </dependency>
   </dependencies>
   <repositories>
@@ -126,7 +124,7 @@
         <configuration>
           <serverId>ossrh</serverId>
           <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-          <autoReleaseAfterClose>true</autoReleaseAfterClose>
+          <autoReleaseAfterClose>false</autoReleaseAfterClose>
         </configuration>
       </plugin>
       <plugin>
@@ -164,6 +162,8 @@
                     <arg>--pinentry-mode</arg>
                     <arg>loopback</arg>
                   </gpgArguments>
+                  <keyname>${gpg.keyname}</keyname>
+                  <passphraseServerId>${gpg.keyname}</passphraseServerId>
                 </configuration>
               </execution>
             </executions>
