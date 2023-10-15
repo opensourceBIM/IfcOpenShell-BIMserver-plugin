@@ -61,6 +61,7 @@ public class IfcGeomServerClient implements AutoCloseable {
 
 	private boolean calculateQuantities = false;
 	private boolean applyLayersets = false;
+	private boolean disableOpeningSubtractions = false;
 
 	public boolean doesCalculateQuantities() {
 		return calculateQuantities;
@@ -82,6 +83,17 @@ public class IfcGeomServerClient implements AutoCloseable {
 			throw new RenderEngineException("Cannot be changed when running");
 		}
 		this.applyLayersets = applyLayersets;
+	}
+
+	public boolean disablesOpeningSubtractions(){
+		return disableOpeningSubtractions;
+	}
+
+	public void setDisableOpeningSubtractions(boolean disableOpeningSubtractions) throws RenderEngineException {
+		if (process != null) {
+			throw new RenderEngineException("Cannot be changed when running");
+		}
+		this.disableOpeningSubtractions = disableOpeningSubtractions;
 	}
 
 	private Process process = null;
@@ -257,6 +269,7 @@ public class IfcGeomServerClient implements AutoCloseable {
 			
 			new Setting(Setting.SettingId.CALCULATE_QUANTITITES, calculateQuantities).write(dos);
 			new Setting(Setting.SettingId.APPLY_LAYERSETS, applyLayersets).write(dos);
+			new Setting(Setting.SettingId.DISABLE_OPENING_SUBTRACTION, disableOpeningSubtractions).write(dos);
 		} catch (IOException e) {
 			throw new RenderEngineException(e);
 		}
@@ -642,7 +655,8 @@ public class IfcGeomServerClient implements AutoCloseable {
 
 		public enum SettingId {
 			CALCULATE_QUANTITITES(1 << 4),
-			APPLY_LAYERSETS (1 << 13);
+			APPLY_LAYERSETS (1 << 13),
+			DISABLE_OPENING_SUBTRACTION(1 << 6);
 
 			private final int id;
 

@@ -70,15 +70,17 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	private static final String COMMIT_SHA_SETTING = "commitsha";
 	private static final String CALCULATE_QUANTITIES_SETTING = "calculatequantities";
 	private static final String APPLY_LAYER_SETS = "applylayersets";
+	private static final String DISABLE_OPENING_SUBTRACTIONS = "disableopeningsubtrations";
 	private Path executableFilename;
 	private VersionInfo versionInfo;
 	private boolean calculateQuantities = true;
 	private boolean applyLayerSets = true;
+	private boolean disableOpeningSubtractions = false;
 
 	@Override
 	public RenderEngine createRenderEngine(PluginConfiguration pluginConfiguration, String schema) throws RenderEngineException {
 		try {
-			return new IfcOpenShellEngine(executableFilename, calculateQuantities, applyLayerSets);
+			return new IfcOpenShellEngine(executableFilename, calculateQuantities, applyLayerSets, disableOpeningSubtractions);
 		} catch (IOException e) {
 			throw new RenderEngineException(e);
 		}
@@ -92,6 +94,7 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		if (systemSettings != null) {
 			calculateQuantities = systemSettings.getBoolean(CALCULATE_QUANTITIES_SETTING, true);
 			applyLayerSets = systemSettings.getBoolean(APPLY_LAYER_SETS, true);
+			disableOpeningSubtractions = systemSettings.getBoolean(DISABLE_OPENING_SUBTRACTIONS, false);
 		}
 		
 		String commitSha = DEFAULT_COMMIT_SHA;
@@ -129,7 +132,10 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 
 		BooleanType defaultTrue = StoreFactory.eINSTANCE.createBooleanType();
 		defaultTrue.setValue(true);
-		
+
+		BooleanType defaultFalse = StoreFactory.eINSTANCE.createBooleanType();
+		defaultFalse.setValue(false);
+
 		ParameterDefinition commitShaParameter = StoreFactory.eINSTANCE.createParameterDefinition();
 		commitShaParameter.setIdentifier(COMMIT_SHA_SETTING);
 		commitShaParameter.setName("Commit Sha");
@@ -153,10 +159,19 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		applyLayerSets.setType(booleanType);
 		applyLayerSets.setRequired(false);
 		applyLayerSets.setDefaultValue(defaultTrue);
+
+		ParameterDefinition disableOpeningSubtractions = StoreFactory.eINSTANCE.createParameterDefinition();
+		disableOpeningSubtractions.setIdentifier(DISABLE_OPENING_SUBTRACTIONS);
+		disableOpeningSubtractions.setName("Disable Opening Subtractions");
+		disableOpeningSubtractions.setDescription("Omits subtractions of voiding opening elements form the voided elements.");
+		disableOpeningSubtractions.setType(booleanType);
+		disableOpeningSubtractions.setRequired(false);
+		disableOpeningSubtractions.setDefaultValue(defaultFalse);
 		
 		settings.getParameters().add(commitShaParameter);
 		settings.getParameters().add(calculateQuantities);
 		settings.getParameters().add(applyLayerSets);
+		settings.getParameters().add(disableOpeningSubtractions);
 		return settings;
 	}
 	

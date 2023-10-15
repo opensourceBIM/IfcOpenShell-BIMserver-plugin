@@ -61,11 +61,13 @@ public class IfcOpenShellEngine implements RenderEngine {
 	private IfcGeomServerClient client;
 	private boolean calculateQuantities;
 	private boolean applyLayerSets;
+	private boolean disableOpeningSubtractions;
 	
-	public IfcOpenShellEngine(Path executableFilename, boolean calculateQuantities, boolean applyLayerSets) throws IOException {
+	public IfcOpenShellEngine(Path executableFilename, boolean calculateQuantities, boolean applyLayerSets, boolean disableOpeningSubtractions) throws IOException {
 		this.executableFilename = executableFilename;
 		this.setCalculateQuantities(calculateQuantities);
 		this.setApplyLayerSets(applyLayerSets);
+		this.setDisableOpeningSubtractions(disableOpeningSubtractions);
 	}
 
 	@Override
@@ -75,6 +77,7 @@ public class IfcOpenShellEngine implements RenderEngine {
 		client = new IfcGeomServerClient(executableFilename);
 		client.setCalculateQuantities(isCalculateQuantities());
 		client.setApplyLayersets(isApplyLayerSets());
+		client.setDisableOpeningSubtractions(isDisableOpeningSubtractions());
 	}
 	
 	@Override
@@ -124,6 +127,15 @@ public class IfcOpenShellEngine implements RenderEngine {
 	public void setApplyLayerSets(boolean applyLayerSets) {
 		this.applyLayerSets = applyLayerSets;
 	}
+
+	public boolean isDisableOpeningSubtractions(){
+		return disableOpeningSubtractions;
+	}
+	public void setDisableOpeningSubtractions(boolean disableOpeningSubtractions) {
+		this.disableOpeningSubtractions = disableOpeningSubtractions;
+	}
+
+
 
 	@Override
 	public Metrics getMetrics() {
