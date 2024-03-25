@@ -61,10 +61,6 @@
       <id>central</id>
       <url>https://repo1.maven.org/maven2</url>
     </repository>
-			<repository>
-				<id>brusnika-tech-repo</id>
-				<url>https://repo.brusnika.tech/repository/maven-snapshots/</url>
-			</repository>
   </repositories>
   <build>
     <sourceDirectory>src</sourceDirectory>
