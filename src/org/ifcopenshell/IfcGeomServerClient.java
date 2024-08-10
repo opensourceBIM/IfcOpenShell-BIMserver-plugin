@@ -162,15 +162,15 @@ public class IfcGeomServerClient implements AutoCloseable {
 		REPOSITORY, S3
 	}
 
-	public IfcGeomServerClient(ExecutableSource source, String commitSha) throws RenderEngineException {
-		getExecutable(source, commitSha, Paths.get(System.getProperty("user.home")));
+	public IfcGeomServerClient(ExecutableSource source, String buildVersion) throws RenderEngineException {
+		getExecutable(source, buildVersion, Paths.get(System.getProperty("user.home")));
 	}
 
-	public IfcGeomServerClient(ExecutableSource source, String commitSha, Path homeDir) throws RenderEngineException {
-		getExecutable(source, commitSha, homeDir);
+	public IfcGeomServerClient(ExecutableSource source, String buildVersion, Path homeDir) throws RenderEngineException {
+		getExecutable(source, buildVersion, homeDir);
 	}
 
-	private void getExecutable(ExecutableSource source, String commitSha, Path homeDir) throws RenderEngineException {
+	private void getExecutable(ExecutableSource source, String buildVersion, Path homeDir) throws RenderEngineException {
 		if (source == ExecutableSource.REPOSITORY) {
 			try {
 				this.executableFilename = getExecutablePathFromRepo(getSourcePath());
@@ -187,7 +187,7 @@ public class IfcGeomServerClient implements AutoCloseable {
 			
 			String platform = getPlatform();
 			try {
-				String url = "https://s3.amazonaws.com/ifcopenshell-builds/IfcGeomServer-" + IfcOpenShellEnginePlugin.BRANCH + "-" + commitSha + "-" + platform + ".zip";
+				String url = "https://s3.amazonaws.com/ifcopenshell-builds/IfcGeomServer-" + buildVersion + "-" + platform + ".zip";
 				
 				String baseName = new File(new URL(url).getPath()).getName();
 				baseName = baseName.substring(0, baseName.length() - 4);
@@ -315,7 +315,7 @@ public class IfcGeomServerClient implements AutoCloseable {
 	private static final int DEFLECTION = LOG + 1;
 	private static final int SETTING = DEFLECTION + 1;
 
-	private static String VERSION = "IfcOpenShell-0.6.0b0-0";
+	private static final String PROTOCOL_VERSION = "IfcOpenShell-0.6.0b0-0";
 
 	abstract static class Command {
 		abstract void read_contents(LittleEndianDataInputStream s) throws IOException;
@@ -798,8 +798,8 @@ public class IfcGeomServerClient implements AutoCloseable {
 		return hasMore;
 	}
 
-	public String getVersion() {
-		return VERSION;
+	public String getProtocolVersion() {
+		return PROTOCOL_VERSION;
 	}
 
 	public GregorianCalendar getBuildDateTime() {

@@ -65,9 +65,8 @@ import org.slf4j.LoggerFactory;
 
 public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IfcOpenShellEnginePlugin.class);
-	public static final String BRANCH = "v0.6.0";
-	public static final String DEFAULT_COMMIT_SHA = "721fe47"; // last v0.6.0 version, from 17.09.2021
-	private static final String COMMIT_SHA_SETTING = "commitsha";
+	public static final String DEFAULT_BUILD_VERSION = "v0.6.0-721fe47"; // last v0.6.0 version, from 17.09.2021
+	private static final String BUILD_VERSION = "buildversion";
 	private static final String CALCULATE_QUANTITIES_SETTING = "calculatequantities";
 	private static final String APPLY_LAYER_SETS = "applylayersets";
 	private static final String DISABLE_OPENING_SUBTRACTIONS = "disableopeningsubtrations";
@@ -97,16 +96,16 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 			disableOpeningSubtractions = systemSettings.getBoolean(DISABLE_OPENING_SUBTRACTIONS, false);
 		}
 		
-		String commitSha = DEFAULT_COMMIT_SHA;
-		if (systemSettings != null && systemSettings.getString(COMMIT_SHA_SETTING) != null && !systemSettings.getString(COMMIT_SHA_SETTING).trim().contentEquals("")) {
+		String buildVersion = DEFAULT_BUILD_VERSION;
+		if (systemSettings != null && systemSettings.getString(BUILD_VERSION) != null && !systemSettings.getString(BUILD_VERSION).trim().contentEquals("")) {
 			// Overruled by system settings
-			commitSha = systemSettings.getString(COMMIT_SHA_SETTING);
-			LOGGER.info("Using overruled system setting for commit sha");
+			buildVersion = systemSettings.getString(BUILD_VERSION);
+			LOGGER.info("Using overruled system setting for build version");
 		}
 		
-		try (IfcGeomServerClient test = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3, commitSha, pluginContext.getTempDir())) {
+		try (IfcGeomServerClient test = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3, buildVersion, pluginContext.getTempDir())) {
 			executableFilename = test.getExecutableFilename();
-			versionInfo = new VersionInfo(BRANCH, commitSha, test.getVersion(), test.getBuildDateTime(), test.getPlatform());
+			versionInfo = new VersionInfo(buildVersion, test.getProtocolVersion(), test.getBuildDateTime(), test.getPlatform());
 		}
 		
 		LOGGER.info("Using " + executableFilename);
@@ -127,8 +126,8 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		PrimitiveDefinition booleanType = StoreFactory.eINSTANCE.createPrimitiveDefinition();
 		booleanType.setType(PrimitiveEnum.BOOLEAN);
 		
-		StringType defaultSha = StoreFactory.eINSTANCE.createStringType();
-		defaultSha.setValue(DEFAULT_COMMIT_SHA);
+		StringType defaultBuildVersion = StoreFactory.eINSTANCE.createStringType();
+		defaultBuildVersion.setValue(DEFAULT_BUILD_VERSION);
 
 		BooleanType defaultTrue = StoreFactory.eINSTANCE.createBooleanType();
 		defaultTrue.setValue(true);
@@ -136,13 +135,13 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		BooleanType defaultFalse = StoreFactory.eINSTANCE.createBooleanType();
 		defaultFalse.setValue(false);
 
-		ParameterDefinition commitShaParameter = StoreFactory.eINSTANCE.createParameterDefinition();
-		commitShaParameter.setIdentifier(COMMIT_SHA_SETTING);
-		commitShaParameter.setName("Commit Sha");
-		commitShaParameter.setDescription("Commit sha of IfcOpenShell binary, this overrules the default for the currently installated IfcOpenShell plugin");
-		commitShaParameter.setType(stringType);
-		commitShaParameter.setRequired(false);
-		commitShaParameter.setDefaultValue(defaultSha);
+		ParameterDefinition buildVersionParameter = StoreFactory.eINSTANCE.createParameterDefinition();
+		buildVersionParameter.setIdentifier(BUILD_VERSION);
+		buildVersionParameter.setName("Build version");
+		buildVersionParameter.setDescription("Build version of IfcOpenShell binary, usually consisting of version number and commit SHA. This overrules the default for the currently installed IfcOpenShell plugin");
+		buildVersionParameter.setType(stringType);
+		buildVersionParameter.setRequired(false);
+		buildVersionParameter.setDefaultValue(defaultBuildVersion);
 
 		ParameterDefinition calculateQuantities = StoreFactory.eINSTANCE.createParameterDefinition();
 		calculateQuantities.setIdentifier(CALCULATE_QUANTITIES_SETTING);
@@ -168,7 +167,7 @@ public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 		disableOpeningSubtractions.setRequired(false);
 		disableOpeningSubtractions.setDefaultValue(defaultFalse);
 		
-		settings.getParameters().add(commitShaParameter);
+		settings.getParameters().add(buildVersionParameter);
 		settings.getParameters().add(calculateQuantities);
 		settings.getParameters().add(applyLayerSets);
 		settings.getParameters().add(disableOpeningSubtractions);

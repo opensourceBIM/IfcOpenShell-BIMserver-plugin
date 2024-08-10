@@ -27,7 +27,7 @@ public class ClientRunner {
 	
 	public static void main(String [] args)
 	{
-		try (IfcGeomServerClient client = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3, IfcOpenShellEnginePlugin.DEFAULT_COMMIT_SHA)) {
+		try (IfcGeomServerClient client = new IfcGeomServerClient(IfcGeomServerClient.ExecutableSource.S3, IfcOpenShellEnginePlugin.DEFAULT_BUILD_VERSION)) {
 			try {
 				client.setCalculateQuantities(true);
 			} catch (RenderEngineException e1) {
