@@ -65,7 +65,7 @@ import org.slf4j.LoggerFactory;
 
 public class IfcOpenShellEnginePlugin implements RenderEnginePlugin {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IfcOpenShellEnginePlugin.class);
-	public static final String DEFAULT_BUILD_VERSION = "v0.6.0-721fe47"; // last v0.6.0 version, from 17.09.2021
+	public static final String DEFAULT_BUILD_VERSION = "v0.7.0-c7830e9"; // last v0.7.0 version, from 30.05.2024
 	private static final String BUILD_VERSION = "buildversion";
 	private static final String CALCULATE_QUANTITIES_SETTING = "calculatequantities";
 	private static final String APPLY_LAYER_SETS = "applylayersets";
