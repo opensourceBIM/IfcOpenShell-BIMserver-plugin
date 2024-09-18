@@ -266,10 +266,11 @@ public class IfcGeomServerClient implements AutoCloseable {
 
 			Hello h = new Hello();
 			h.read(dis);
-			
+
+			boolean isV070 = h.getString().startsWith("IfcOpenShell-v0.7.0"); // https://github.com/IfcOpenShell/IfcOpenShell/commit/ff73f82798a8e744a0b7e2aaa353252df0a2934c
 			new Setting(Setting.SettingId.CALCULATE_QUANTITITES, calculateQuantities).write(dos);
-			new Setting(Setting.SettingId.APPLY_LAYERSETS, applyLayersets).write(dos);
-			new Setting(Setting.SettingId.DISABLE_OPENING_SUBTRACTION, disableOpeningSubtractions).write(dos);
+			new Setting(isV070 ? Setting.SettingId.APPLY_LAYERSETS_V070 : Setting.SettingId.APPLY_LAYERSETS, applyLayersets).write(dos);
+			new Setting(isV070 ? Setting.SettingId.DISABLE_OPENING_SUBTRACTION_V070 : Setting.SettingId.DISABLE_OPENING_SUBTRACTION, disableOpeningSubtractions).write(dos);
 		} catch (IOException e) {
 			throw new RenderEngineException(e);
 		}
@@ -656,7 +657,9 @@ public class IfcGeomServerClient implements AutoCloseable {
 		public enum SettingId {
 			CALCULATE_QUANTITITES(1 << 4),
 			APPLY_LAYERSETS (1 << 13),
-			DISABLE_OPENING_SUBTRACTION(1 << 6);
+			APPLY_LAYERSETS_V070(1 << 12),
+			DISABLE_OPENING_SUBTRACTION(1 << 6),
+			DISABLE_OPENING_SUBTRACTION_V070(1 << 5);
 
 			private final int id;
 
