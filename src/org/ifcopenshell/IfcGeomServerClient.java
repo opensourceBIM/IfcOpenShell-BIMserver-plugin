@@ -198,8 +198,8 @@ public class IfcGeomServerClient implements AutoCloseable {
 					LOGGER.info(String.format("Downloading from %s", url));
 					Files.createDirectories(this.executableFilename.getParent());
 					LOGGER.info(String.format("Unzipping to %s", this.executableFilename.toString()));
-					
-					try (CloseableHttpClient httpClient = HttpClients.custom().useSystemProperties().build()) {
+
+					try (CloseableHttpClient httpClient = HttpClients.createSystem()) {
 						HttpGet httpGet = new HttpGet(url);
 						try (CloseableHttpResponse httpResponse = httpClient.execute(httpGet)) {
 							if (httpResponse.getStatusLine().getStatusCode() == 200) {
